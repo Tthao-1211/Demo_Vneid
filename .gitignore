@@ -1,0 +1,8 @@
+﻿# File người dùng tải lên (giữ lại .gitkeep)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Hệ điều hành và editor
+.DS_Store
+Thumbs.db
+.vscode/

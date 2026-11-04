@@ -8,14 +8,23 @@ if (php_sapi_name() === 'cli-server') {
 }
 
 session_start();
+$_SESSION['ma_nguoi_dung'] = 3; // Giả lập công dân Nguyễn Văn An đã đăng nhập
+// Giả lập tài khoản Cán bộ xử lý đã đăng nhập (Trần Văn Cán Bộ)
+$_SESSION['ma_nguoi_dung'] = 2;
+$_SESSION['ma_vai_tro']    = 2; // 2 = Cán bộ xử lý
+$_SESSION['ho_ten']        = 'Trần Văn Cán Bộ';
 require_once __DIR__ . '/config/hang_so.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/app/helpers/xac_thuc.php';
 require_once __DIR__ . '/app/helpers/phan_quyen.php';
 
 $duong_dan = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$thu_muc_du_an = trim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+if (!empty($thu_muc_du_an) && strpos($duong_dan, $thu_muc_du_an) === 0) {
+    $duong_dan = trim(substr($duong_dan, strlen($thu_muc_du_an)), '/');
+}
 if ($duong_dan === '') {
-    $duong_dan = 'nguoi_dung/dang_nhap';
+    $duong_dan = 'dich_vu/danh_sach';
 }
 $ds_phan       = explode('/', $duong_dan);
 $ten_module    = $ds_phan[0];

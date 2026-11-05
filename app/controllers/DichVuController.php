@@ -74,4 +74,9 @@ class DichVuController {
         $ds_ho_so = $this->model_ho_so->layDanhSachCanBo();
         require_once __DIR__ . '/../views/dich_vu/ds_ho_so_can_xu_ly.php';
     }
+    // Đường dẫn: /dich_vu/khai_bao_tam_tru
+    public function khaiBaoTamTru() {
+        yeuCauDangNhap();
+        require_once __DIR__ . '/../views/dich_vu/khai_bao_tam_tru.php';
+    }
 }

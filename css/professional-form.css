@@ -1,0 +1,695 @@
+/* Giao diện thống nhất cho các form và trang quản lý VNeID mô phỏng */
+body {
+    background: #E9EAE8 !important;
+    font-family: 'Times New Roman', Times, serif !important;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+main,
+.shell,
+.admin-shell,
+.box,
+.vneid-form-container,
+.vneid-table-container,
+.vneid-container,
+.panel {
+    width: min(1180px, calc(100% - 32px));
+}
+
+.box,
+.vneid-form-container,
+.vneid-table-container,
+.vneid-container {
+    background: #fff !important;
+    border-radius: 18px !important;
+    border: 1px solid #d2d4d2 !important;
+    border-top: 5px solid #b91c1c !important;
+    box-shadow: 0 14px 34px rgba(36, 40, 38, .14) !important;
+    box-sizing: border-box;
+}
+
+.vneid-form-container,
+.box {
+    padding: 28px 30px 32px !important;
+}
+
+.vneid-section-title,
+.box>h1,
+.box h1,
+.page-title,
+h1.vneid-section-title {
+    color: #b91c1c !important;
+    text-align: center !important;
+    font-weight: 800 !important;
+    letter-spacing: .2px;
+}
+
+h1,
+.vneid-header-title {
+    color: #b91c1c !important;
+}
+
+h2 {
+    color: #b91c1c !important;
+}
+
+.boca-brand {
+    color: #222 !important;
+}
+
+.boca-title {
+    color: #b91c1c !important;
+}
+
+.boca-sub {
+    color: #5f6260 !important;
+}
+
+.vneid-section-sub {
+    color: #64748b !important;
+    text-align: center;
+}
+
+.form-group-custom label,
+.field label,
+.box label {
+    color: #7f1d1d !important;
+    font-weight: 700 !important;
+}
+
+.form-grid-custom,
+.row,
+.adjust-grid {
+    gap: 14px !important;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="date"],
+input[type="file"],
+input[type="number"],
+select,
+textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #111827 !important;
+    font-family: 'Times New Roman', Times, serif !important;
+    font-size: 15px !important;
+    padding: 12px 13px !important;
+    outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #df2424 !important;
+    box-shadow: 0 0 0 3px rgba(223, 36, 36, .09) !important;
+}
+
+input[readonly],
+input:disabled {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+.btn,
+.btn-submit,
+.btn-vneid-submit,
+.btn-vneid-submit-custom,
+.submit-adjust,
+.btn-search,
+.btn-box-retry {
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: #df2424 !important;
+    color: #fff !important;
+    font-family: 'Times New Roman', Times, serif !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 10px rgba(223, 36, 36, .18);
+}
+
+.btn:hover,
+.btn-submit:hover,
+.btn-vneid-submit:hover,
+.btn-vneid-submit-custom:hover,
+.submit-adjust:hover,
+.btn-search:hover {
+    background: #c91e17 !important;
+}
+
+.btn-back-arrow,
+.back-link,
+.back,
+.box>a:first-child {
+    color: #c31818 !important;
+    border: 0 !important;
+    background: transparent !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+}
+
+.type-option,
+.status-radio-card,
+.profile,
+.citizen-card-summary,
+.card-item,
+.readonly-field,
+.request-card {
+    border-radius: 10px !important;
+    border-color: #d2d4d2 !important;
+}
+
+.type-option.active,
+.status-radio-card.selected {
+    border-color: #e3261f !important;
+    background: #fffafa !important;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th {
+    background: #fff7f7 !important;
+    color: #7f1d1d !important;
+    font-size: 14px;
+}
+
+th,
+td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px !important;
+    text-align: left;
+}
+
+tbody tr:hover {
+    background: #fffafa;
+}
+
+.badge,
+.badge-status {
+    border-radius: 999px !important;
+    font-weight: 800;
+    padding: 6px 10px !important;
+}
+
+.notice,
+.alert-success {
+    border-radius: 8px !important;
+    text-align: center;
+}
+
+.detail-row,
+.profile-row {
+    min-height: 44px;
+}
+
+/* Trang quản trị kiểu Web: bảng dữ liệu, thanh công cụ và trạng thái rõ ràng */
+body {
+    min-width: 320px;
+}
+
+.admin-shell,
+.shell,
+.vneid-table-container,
+.box {
+    margin: 24px auto;
+}
+
+.admin-header,
+.head,
+.page-header,
+.header {
+    border-bottom: 1px solid #e1e4e1;
+}
+
+.admin-header {
+    box-shadow: none !important;
+}
+
+.filters,
+.search-bar,
+.toolbar,
+.filter-row,
+.action-bar {
+    display: flex !important;
+    align-items: center;
+    gap: 10px !important;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+}
+
+.filters input,
+.search-bar input,
+.search-box input,
+.filter-row input {
+    flex: 1 1 320px;
+}
+
+.filters select,
+.filter-row select,
+.toolbar select,
+.filters button,
+.search-bar button,
+.toolbar button {
+    flex: 0 0 auto;
+}
+
+.admin-nav a,
+.head a,
+.head .btn {
+    border-radius: 7px !important;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table,
+.vneid-table,
+.data-table,
+.request-table {
+    border-spacing: 0;
+    border: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden;
+    background: #fff;
+}
+
+.table thead,
+.vneid-table thead,
+.data-table thead,
+.request-table thead {
+    background: #a31515;
+    color: #fff;
+}
+
+.table th,
+.vneid-table th,
+.data-table th,
+.request-table th {
+    background: #a31515 !important;
+    color: #fff !important;
+    border-bottom: 0 !important;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .25px;
+    white-space: nowrap;
+}
+
+.table tbody tr,
+.vneid-table tbody tr,
+.data-table tbody tr,
+.request-table tbody tr {
+    background: #fff;
+}
+
+.table tbody tr:nth-child(even),
+.vneid-table tbody tr:nth-child(even),
+.data-table tbody tr:nth-child(even),
+.request-table tbody tr:nth-child(even) {
+    background: #fcfcfb;
+}
+
+.table tbody tr:hover,
+.vneid-table tbody tr:hover,
+.data-table tbody tr:hover,
+.request-table tbody tr:hover {
+    background: #fff6f6 !important;
+}
+
+.table td,
+.vneid-table td,
+.data-table td,
+.request-table td {
+    border-bottom: 1px solid #e8e9e7 !important;
+}
+
+.actions,
+.table-actions,
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.actions a,
+.table-actions a,
+.row-actions a,
+.actions button,
+.table-actions button,
+.row-actions button,
+.btn-detail {
+    min-height: 34px;
+    border-radius: 7px !important;
+    padding: 7px 10px !important;
+    line-height: 1.15;
+}
+
+.actions button,
+.table-actions button,
+.row-actions button {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.actions a,
+.table-actions a,
+.row-actions a,
+.btn-detail {
+    border: 1px solid #b91c1c !important;
+    color: #a31515 !important;
+    background: #fff !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actions a:hover,
+.table-actions a:hover,
+.row-actions a:hover,
+.btn-detail:hover {
+    color: #fff !important;
+    background: #a31515 !important;
+}
+
+.status,
+.badge,
+.badge-status,
+.trang-thai {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    border-radius: 999px !important;
+    white-space: nowrap;
+}
+
+form input[type="email"],
+form input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    padding: 12px 13px;
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 0 !important;
+    }
+
+    main,
+    .shell,
+    .admin-shell,
+    .panel {
+        width: calc(100% - 20px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    button,
+    .btn,
+    input[type="submit"],
+    a.btn {
+        min-height: 44px;
+    }
+
+    .table,
+    table {
+        max-width: 100%;
+    }
+}
+
+/* Hiển thị Web thống nhất cho khu vực Công dân: không ép thành giao diện ứng dụng mobile */
+@media (max-width: 700px) {
+
+    .topbar,
+    main,
+    .shell,
+    .admin-shell,
+    .status-page,
+    .box,
+    .vneid-form-container,
+    .vneid-table-container,
+    .vneid-container,
+    .panel {
+        min-height: auto !important;
+    }
+
+    .topbar {
+        width: calc(100% - 20px) !important;
+        margin: 10px auto 0 !important;
+        border-radius: 10px !important;
+        padding: 14px !important;
+    }
+
+    main {
+        width: calc(100% - 20px) !important;
+        margin-bottom: 20px !important;
+        padding: 20px 14px !important;
+        border-radius: 10px !important;
+    }
+
+    .status-page,
+    .box,
+    .vneid-form-container,
+    .vneid-table-container,
+    .vneid-container,
+    .panel {
+        width: calc(100% - 20px) !important;
+        min-height: auto !important;
+        margin: 10px auto 20px !important;
+        border-radius: 10px !important;
+    }
+
+    .menu-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+
+    .menu-card {
+        min-height: 145px !important;
+        padding: 16px !important;
+        border-radius: 10px !important;
+    }
+
+    .menu-card:nth-last-child(1):nth-child(4) {
+        grid-column: auto !important;
+    }
+}
+
+/* Ép toàn bộ khu vực Công dân về bố cục Web dữ liệu, không hiển thị như ứng dụng mobile */
+body:has(.menu-grid),
+body:has(.status-page),
+body:has(.box) {
+    min-height: 100vh !important;
+    background: #E9EAE8 !important;
+}
+
+.topbar {
+    width: min(1180px, calc(100% - 32px)) !important;
+    max-width: 1180px !important;
+    margin: 18px auto 0 !important;
+    border-radius: 10px 10px 6px 6px !important;
+    box-shadow: 0 8px 20px rgba(36, 40, 38, .08) !important;
+}
+
+body>main:not(.status-page):not(.shell) {
+    width: min(1180px, calc(100% - 32px)) !important;
+    max-width: 1180px !important;
+    margin: 14px auto 28px !important;
+    border-radius: 10px !important;
+}
+
+.welcome {
+    border-bottom: 0 !important;
+    text-align: left !important;
+    padding: 0 0 16px !important;
+    margin-bottom: 16px !important;
+}
+
+.welcome h1 {
+    font-size: 26px !important;
+}
+
+.welcome p {
+    font-size: 14px !important;
+}
+
+.menu-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+}
+
+.menu-card {
+    min-height: 145px !important;
+    border-radius: 8px !important;
+    border-top-width: 1px !important;
+    border-left-width: 4px !important;
+    border-left-color: #b91c1c !important;
+    box-shadow: 0 5px 14px rgba(36, 40, 38, .08) !important;
+    padding: 18px !important;
+}
+
+.menu-card:nth-last-child(1):nth-child(4),
+.menu-card:nth-last-child(1):nth-child(7) {
+    grid-column: auto !important;
+}
+
+.menu-card:hover {
+    transform: none !important;
+    box-shadow: 0 8px 18px rgba(36, 40, 38, .12) !important;
+}
+
+.menu-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 7px !important;
+    margin-bottom: 10px !important;
+    font-size: 19px !important;
+}
+
+.menu-card h2 {
+    font-size: 17px !important;
+}
+
+.menu-card p {
+    line-height: 1.45 !important;
+}
+
+.status-page,
+.box {
+    width: min(1180px, calc(100% - 32px)) !important;
+    max-width: 1180px !important;
+    min-height: auto !important;
+    margin: 14px auto 28px !important;
+    border-radius: 10px !important;
+}
+
+.status-page h1,
+.box h1 {
+    text-align: left !important;
+    font-size: 26px !important;
+    border-bottom: 1px solid #e7e9e7;
+    padding-bottom: 14px;
+}
+
+.current-card,
+.summary {
+    gap: 12px !important;
+}
+
+.current-box,
+.summary-item,
+.status-section,
+.request-card {
+    border-radius: 8px !important;
+}
+
+.request-list {
+    width: 100%;
+}
+
+.request-card {
+    overflow: hidden;
+}
+
+.request-head {
+    background: #fff7f7 !important;
+}
+
+.actions-row {
+    border-top: 1px solid #e8e9e7;
+    padding-top: 14px;
+}
+
+.action-btn {
+    min-width: 150px !important;
+}
+
+@media (max-width: 760px) {
+
+    .topbar,
+    body>main:not(.status-page):not(.shell),
+    .status-page,
+    .box {
+        width: calc(100% - 20px) !important;
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .welcome {
+        text-align: left !important;
+    }
+
+    .box,
+    .vneid-form-container,
+    .vneid-table-container {
+        width: 100% !important;
+        min-height: 100vh !important;
+        max-width: none !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        padding: 20px 16px !important;
+    }
+
+    .form-grid-custom,
+    .type-selector,
+    .status-option-grid,
+    .readonly-grid,
+    .success-actions,
+    .actions,
+    .box-actions {
+        grid-template-columns: 1fr !important;
+    }
+
+    .span-2 {
+        grid-column: auto !important;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .vneid-section-title,
+    .box h1 {
+        font-size: 21px !important;
+    }
+}

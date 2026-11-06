@@ -16,8 +16,8 @@
     <section class="khoi">
       <h2>Hồ sơ</h2>
 
-      <div class="luoi luoi-5">
-        <?php foreach (NangMucDinhDanh::NHAN_TRANG_THAI as $khoa => $ten_tt): ?>
+      <div class="luoi luoi-4">
+        <?php foreach ($NHAN_CHUNG as $khoa => $ten_tt): ?>
           <a class="the-so" href="/nguoi_dung/trang_chu_can_bo?trang_thai=<?= e($khoa) ?>"
              style="<?= $trang_thai === $khoa ? 'outline:2px solid #d71f18' : '' ?>">
             <strong><?= (int)($ds_thong_ke[$khoa] ?? 0) ?></strong>
@@ -41,21 +41,25 @@
       </form>
 
       <div class="bang-cuon">
+        <?php if (!empty($canh_bao)): ?><p class="trong"><?= e($canh_bao) ?></p><?php endif; ?>
         <table class="bang">
-          <thead><th>Mã</th><th>Loại dịch vụ</th><th>Công dân</th><th>Số định danh</th><th>Ngày nộp</th><th>Trạng thái</th></thead>
+          <thead>
+            <tr><th>Mã</th><th>Nguồn</th><th>Loại</th><th>Công dân</th><th>Số định danh</th><th>Ngày</th><th>Trạng thái</th></tr>
+          </thead>
           <tbody>
-            <?php foreach ($ds_ho_so as $ho_so): ?>
+            <?php foreach ($ds_ho_so as $h): ?>
               <tr>
-                <td>#<?= (int)$ho_so['ma_ho_so'] ?></td>
-                <td><?= e($ho_so['ten_dich_vu']) ?></td>
-                <td><?= e($ho_so['ho_ten']) ?></td>
-                <td><?= e($ho_so['so_dinh_danh']) ?></td>
-                <td><?= e($ho_so['ngay_nop']) ?></td>
-                <td><span class="nhan nhan-<?= e($ho_so['trang_thai']) ?>"><?= e(NangMucDinhDanh::NHAN_TRANG_THAI[$ho_so['trang_thai']]) ?></span></td>
+                <td><?= e($h['ma']) ?></td>
+                <td><?= e($h['nguon']) ?></td>
+                <td><?= e($h['loai']) ?></td>
+                <td><?= e($h['ho_ten']) ?></td>
+                <td><?= e($h['so_dinh_danh']) ?></td>
+                <td><?= $h['ngay'] ? date('d/m/Y', strtotime($h['ngay'])) : '—' ?></td>
+                <td><span class="nhan nhan-<?= e($h['trang_thai']) ?>"><?= e($NHAN_CHUNG[$h['trang_thai']] ?? $h['trang_thai']) ?></span></td>
               </tr>
             <?php endforeach; ?>
             <?php if (!$ds_ho_so): ?>
-              <tr><td colspan="6" class="trong">Không có hồ sơ phù hợp.</td></tr>
+              <tr><td colspan="8" class="trong">Không có hồ sơ phù hợp.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>

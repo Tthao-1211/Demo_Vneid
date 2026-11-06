@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/NangMucDinhDanh.php';
 require_once __DIR__ . '/../models/NguoiDung.php';
+require_once __DIR__ . '/../models/ThongBao.php';
 
 class MucDinhDanhController {
     const KICH_THUOC_TOI_DA = 3145728;
@@ -8,8 +9,10 @@ class MucDinhDanhController {
 
     private $nang_muc_model;
     private $nguoi_dung_model;
+    private $pdo;
 
     public function __construct($pdo) {
+        $this->pdo = $pdo; 
         $this->nang_muc_model   = new NangMucDinhDanh($pdo);
         $this->nguoi_dung_model = new NguoiDung($pdo);
     }
@@ -40,6 +43,13 @@ class MucDinhDanhController {
             if (!$ds_loi) {
                 $this->nang_muc_model->themMoi($ma_nguoi_dung, json_encode($du_lieu, JSON_UNESCAPED_UNICODE),
                     $duong_dan_mat_truoc . ';' . $duong_dan_chan_dung);
+                try {
+                    (new ThongBao($this->pdo))->guiChoCanBo(
+                        ThongBao::LOAI_DICH_VU_CONG,
+                        'Có hồ sơ nâng mức định danh mới',
+                        ($_SESSION['ho_ten'] ?? 'Công dân') . ' vừa gửi hồ sơ nâng mức định danh.'
+                    );
+                } catch (PDOException $e) {}
                 $_SESSION['thong_bao'] = 'Đã gửi hồ sơ nâng mức. Vui lòng chờ cán bộ xử lý.';
                 chuyenHuong('muc_dinh_danh/danh_sach_cua_toi');
             }

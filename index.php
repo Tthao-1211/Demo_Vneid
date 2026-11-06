@@ -9,6 +9,9 @@ if (php_sapi_name() === 'cli-server') {
 }
 
 session_start();
+if (!defined('ROOT')) {
+    define('ROOT', __DIR__);
+}
 require_once __DIR__ . '/config/hang_so.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/app/helpers/xac_thuc.php';
@@ -16,14 +19,14 @@ require_once __DIR__ . '/app/helpers/phan_quyen.php';
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/app/helpers/gui_mail.php';
 require_once __DIR__ . '/app/helpers/nhat_ky.php';
-// require_once __DIR__ . '/app/helpers/canBoGiaoDien.php';
-// require_once __DIR__ . '/app/helpers/canBoXacThuc.php';
-// require_once __DIR__ . '/app/models/CanBoGiayTo.php';
-// require_once __DIR__ . '/app/models/CanBoLoaiGiayTo.php';
-// require_once __DIR__ . '/app/models/CanBoThongBao.php';
-// require_once __DIR__ . '/app/helpers/giaoDien.php';
-// require_once __DIR__ . '/app/helpers/giayToVi.php';
-// require_once __DIR__ . '/app/helpers/thongBao.php';
+require_once __DIR__ . '/app/helpers/canBoGiaoDien.php';
+require_once __DIR__ . '/app/helpers/canBoXacThuc.php';
+require_once __DIR__ . '/app/models/CanBoGiayTo.php';
+require_once __DIR__ . '/app/models/CanBoLoaiGiayTo.php';
+require_once __DIR__ . '/app/models/CanBoThongBao.php';
+require_once __DIR__ . '/app/helpers/giaoDien.php';
+require_once __DIR__ . '/app/helpers/giayToVi.php';
+require_once __DIR__ . '/app/helpers/thongBao.php';
 
 if (kiemTraDangNhap()) {
     $lenh = $pdo->prepare('SELECT trang_thai FROM nguoi_dung WHERE ma_nguoi_dung = ?');

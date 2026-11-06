@@ -3,6 +3,7 @@ require_once __DIR__ . '/../models/NguoiDung.php';
 require_once __DIR__ . '/../models/MaOtp.php';
 require_once __DIR__ . '/../models/NhatKyHeThong.php';
 require_once __DIR__ . '/../models/NangMucDinhDanh.php';
+require_once __DIR__ . '/../models/HoSoDichVu.php';
 
 class NguoiDungController {
     const SO_LAN_NHAP_OTP_TOI_DA = 5;
@@ -143,10 +144,25 @@ class NguoiDungController {
     public function trangChuCanBo() {
         yeuCauVaiTro([VAI_TRO_CAN_BO]);
         $nang_muc_model = new NangMucDinhDanh($this->pdo);
+        $ma_dich_vu_nang_muc = $nang_muc_model->layMaDichVu();
 
-        $ma_dich_vu = (int)($_GET['ma_dich_vu'] ?? 0);
+        // Bộ trạng thái chung cho mọi loại hồ sơ
+        $NHAN_CHUNG = [
+            'cho_xu_ly' => 'Chờ xử lý',
+            'bo_sung'   => 'Cần bổ sung',
+            'da_duyet'  => 'Đã duyệt',
+            'tu_choi'   => 'Từ chối',
+        ];
+        $QUY_DOI = [
+            'dang_xu_ly' => 'cho_xu_ly', 'can_bo_sung' => 'bo_sung',
+            'da_duyet' => 'da_duyet',    'tu_choi' => 'tu_choi',
+            'cho_xac_minh' => 'cho_xu_ly', 'yeu_cau_bo_sung' => 'bo_sung',
+            'da_xac_minh' => 'da_duyet',   'bi_tu_choi' => 'tu_choi',
+        ];
+        $chuan = fn($s) => $QUY_DOI[$s] ?? 'cho_xu_ly';
+
         $trang_thai = $_GET['trang_thai'] ?? '';
-        if ($trang_thai !== '' && !isset(NangMucDinhDanh::NHAN_TRANG_THAI[$trang_thai])) {
+        if ($trang_thai !== '' && !isset($NHAN_CHUNG[$trang_thai])) {
             $trang_thai = '';
         }
         $tu_khoa = trim($_GET['tu_khoa'] ?? '');
@@ -156,10 +172,62 @@ class NguoiDungController {
         $tu_ngay  = $kiem_tra_ngay($_GET['tu_ngay'] ?? '');
         $den_ngay = $kiem_tra_ngay($_GET['den_ngay'] ?? '');
 
-        $ma_dich_vu_nang_muc = $nang_muc_model->layMaDichVu();
-        $ds_dich_vu  = $nang_muc_model->layDanhSachDichVu();
-        $ds_thong_ke = $nang_muc_model->thongKeTheoTrangThai();
-        $ds_ho_so = $nang_muc_model->timKiem($ma_dich_vu, $trang_thai, $tu_khoa, $tu_ngay, $den_ngay);
+        $tat_ca = [];
+        $canh_bao = '';
+
+        // 1) Hồ sơ dịch vụ công (gồm cả hồ sơ nâng mức nếu cùng bảng ho_so_dich_vu)
+        $model_ho_so = new HoSoDichVu();
+        foreach ($model_ho_so->layDanhSachCanBo() as $r) {
+            $la_nang_muc = isset($r['ma_dich_vu']) && (int)$r['ma_dich_vu'] === (int)$ma_dich_vu_nang_muc;
+            $tat_ca[] = [
+                'nguon' => $la_nang_muc ? 'Nâng mức định danh' : 'Dịch vụ công',
+                'ma' => '#DV' . $r['ma_ho_so'],
+                'loai' => $r['ten_dich_vu'], 'ho_ten' => $r['ho_ten'],
+                'so_dinh_danh' => $r['so_dinh_danh'],
+                'ngay' => $r['ngay_nop'] ?? $r['ngay_tao'] ?? null,   // sửa theo tên cột thật
+                'trang_thai' => $chuan($r['trang_thai']),
+                'link' => $la_nang_muc
+                    ? '/muc_dinh_danh/chi_tiet?ma_ho_so=' . $r['ma_ho_so']
+                    : '/dich_vu/ds_ho_so_can_xu_ly',
+            ];
+        }
+
+        // 2) Giấy tờ ví (tên bảng/cột là đoán, sửa cho khớp DB)
+        try {
+            $sql = 'SELECT g.ma_giay_to, g.ngay_cap, g.trang_thai, l.ten_loai, n.ho_ten, n.so_dinh_danh
+                    FROM giay_to_vi g
+                    JOIN loai_giay_to l ON l.ma_loai = g.ma_loai
+                    JOIN nguoi_dung n ON n.ma_nguoi_dung = g.ma_nguoi_dung';
+            foreach ($this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $tat_ca[] = [
+                    'nguon' => 'Giấy tờ ví', 'ma' => '#GT' . $r['ma_giay_to'],
+                    'loai' => $r['ten_loai'], 'ho_ten' => $r['ho_ten'],
+                    'so_dinh_danh' => $r['so_dinh_danh'], 'ngay' => $r['ngay_cap'],
+                    'trang_thai' => $chuan($r['trang_thai']),
+                    'link' => '/can_bo/chi_tiet?id=' . $r['ma_giay_to'],
+                ];
+            }
+        } catch (PDOException $e) {
+            $canh_bao = 'Chưa đọc được giấy tờ ví: ' . $e->getMessage();
+        }
+
+        // Thống kê (trước khi lọc)
+        $ds_thong_ke = array_count_values(array_column($tat_ca, 'trang_thai'));
+
+        // Lọc
+        $tat_ca = array_filter($tat_ca, function ($h) use ($trang_thai, $tu_khoa, $tu_ngay, $den_ngay) {
+            if ($trang_thai && $h['trang_thai'] !== $trang_thai) return false;
+            if ($tu_khoa && stripos($h['ho_ten'] . ' ' . $h['so_dinh_danh'], $tu_khoa) === false) return false;
+            $d = $h['ngay'] ? date('Y-m-d', strtotime($h['ngay'])) : null;
+            if ($tu_ngay && $d && $d < $tu_ngay) return false;
+            if ($den_ngay && $d && $d > $den_ngay) return false;
+            return true;
+        });
+
+        // Mới nhất trước
+        usort($tat_ca, fn($a, $b) => strtotime($b['ngay'] ?? '') <=> strtotime($a['ngay'] ?? ''));
+        $ds_hoso = $ds_ho_so = $tat_ca;
+
         require __DIR__ . '/../views/nguoi_dung/trang_chu_can_bo.php';
     }
 

@@ -1,4 +1,10 @@
 <?php
+require_once __DIR__ . '/../helpers/canBoXacThuc.php';
+require_once __DIR__ . '/../helpers/giaoDien.php';
+require_once __DIR__ . '/../helpers/giayToVi.php';
+require_once __DIR__ . '/../models/CanBoThongBao.php';
+require_once __DIR__ . '/../models/CanBoLoaiGiayTo.php';
+require_once __DIR__ . '/../models/CanBoGiayTo.php';
 // Khu vực cán bộ xử lý: truy cập tại /can_bo/<hanh_dong>
 class CanBoController {
     private function bang(string $menu, string $tieuDe, string $macDinh): void {
@@ -20,6 +26,7 @@ class CanBoController {
         ]);
     }
     public function duyet(): void { $this->bang('duyet', 'Duyệt giấy tờ', 'cho_xac_minh'); }
+    public function danhSach(): void { $this->bang('danh_sach', 'Danh sách giấy tờ', ''); }
 
     public function chiTiet(): void {
         yeuCauCanBo();

@@ -55,12 +55,27 @@ function taoMaCsrf() {
     return $_SESSION['ma_csrf'];
 }
 
-function kiemTraMaCsrf() {
-    $ma_gui = $_POST['ma_csrf'] ?? '';
-    if (!hash_equals($_SESSION['ma_csrf'] ?? '', $ma_gui)) {
+function kiemTraCsrf() {
+    $ma_gui = (string) ($_POST['ma_csrf'] ?? '');
+    $ma_phien = (string) ($_SESSION['ma_csrf'] ?? '');
+    if ($ma_phien === '' || !hash_equals($ma_phien, $ma_gui)) {
         http_response_code(403);
-        exit('Yêu cầu không hợp lệ');
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(
+                ['thanh_cong' => false, 'thong_bao' => 'Phiên hết hạn, hãy tải lại trang.'],
+                JSON_UNESCAPED_UNICODE
+            );
+        } else {
+            echo 'Yêu cầu không hợp lệ';
+        }
+        exit;
     }
+}
+
+// Giữ tên cũ để code nào đang gọi kiemTraMaCsrf() vẫn chạy
+function kiemTraMaCsrf() {
+    kiemTraCsrf();
 }
 
 function e($chuoi) {

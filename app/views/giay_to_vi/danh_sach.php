@@ -167,7 +167,12 @@ document.addEventListener('DOMContentLoaded', function () {
             credentials: 'same-origin',
             body: new FormData(form)
         })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+            return r.text().then(function (txt) {
+                try { return JSON.parse(txt); }
+                catch (err) { throw new Error('HTTP ' + r.status + ' - ' + txt.substring(0, 150)); }
+            });
+        })
         .then(function (d) {
             if (d.thanh_cong) {
                 window.location.href = d.chuyen_huong;
@@ -179,10 +184,10 @@ document.addEventListener('DOMContentLoaded', function () {
             oMatKhau.focus();
             baoLoi(d.thong_bao || 'Có lỗi xảy ra, vui lòng thử lại.');
         })
-        .catch(function () {
+        .catch(function (err) {
             dangGui = false;
             capNhat();
-            baoLoi('Không kết nối được máy chủ.');
+            baoLoi(err.message || 'Không kết nối được máy chủ.');
         });
     });
 });

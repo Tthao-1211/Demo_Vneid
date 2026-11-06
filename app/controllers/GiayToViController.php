@@ -2,6 +2,8 @@
 require_once DUONG_DAN_APP . '/models/GiayToVi.php';
 require_once DUONG_DAN_APP . '/models/TheCanCuoc.php';
 require_once DUONG_DAN_APP . '/models/ThongBao.php';
+require_once __DIR__ . '/../helpers/giaoDien.php';
+require_once __DIR__ . '/../helpers/giayToVi.php';
 
 class GiayToViController {
     const THOI_GIAN_XEM_THE = 120;
@@ -98,6 +100,11 @@ class GiayToViController {
                         'Đã thêm giấy tờ vào ví',
                         'Giấy tờ số ' . $du_lieu_cu['so_giay_to'] . ' đang chờ xác minh.'
                     );
+                    (new ThongBao($this->ket_noi))->guiChoCanBo(
+                        ThongBao::LOAI_HE_THONG,
+                        'Có giấy tờ mới cần xác minh',
+                        ($_SESSION['ho_ten'] ?? 'Công dân') . ' vừa thêm giấy tờ số ' . $du_lieu_cu['so_giay_to'] . '.'
+                    );
                     datPhanHoi('thanh_cong', 'Đã thêm giấy tờ, đang chờ xác minh.');
                     chuyenHuong('giay_to_vi/chi_tiet?ma_giay_to=' . $ma_giay_to);
                 } catch (PDOException $loi) {
@@ -116,6 +123,7 @@ class GiayToViController {
             'ds_loai' => $ds_loai,
             'ds_loi' => $ds_loi,
             'du_lieu_cu' => $du_lieu_cu,
+            'js_them' => ['/public/js/giayToVi.js'],
         ]);
     }
 

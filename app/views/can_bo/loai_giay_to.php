@@ -1,3 +1,4 @@
+
 <div class="dau-trang"><div><h1>Quản lý loại giấy tờ</h1><p>Định nghĩa các trường thông tin riêng (cac_truong) cho từng loại</p></div>
   <button class="nut nut-chinh" data-mo="hop-loai" data-loai='{"ma_loai":"","ten_loai":"","cac_truong":[]}'>+ Thêm loại</button></div>
 <div class="luoi-3">

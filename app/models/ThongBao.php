@@ -105,4 +105,14 @@ class ThongBao {
         $cau_lenh->execute([$loai, $tieu_de, $noi_dung, $ma_nguoi_gui]);
         return $cau_lenh->rowCount();
     }
+
+    public function guiChoCanBo($loai, $tieu_de, $noi_dung) {
+        $cau_lenh = $this->pdo->prepare(
+            "INSERT INTO thong_bao (ma_nguoi_nhan, loai, tieu_de, noi_dung)
+            SELECT ma_nguoi_dung, ?, ?, ? FROM nguoi_dung
+            WHERE trang_thai = 'hoat_dong' AND ma_vai_tro = ?"
+        );
+        $cau_lenh->execute([$loai, $tieu_de, $noi_dung, VAI_TRO_CAN_BO]);
+        return $cau_lenh->rowCount();
+    }
 }

@@ -1,0 +1,87 @@
+.admin-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #f0e6e0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    overflow: hidden; 
+}
+.bang-quan-tri {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+.bang-quan-tri thead th {
+    background: #fdf6f3;
+    color: #5a2a00;
+    font-weight: 700;
+    padding: 12px 6px;
+    border-bottom: 2px solid #ebd8ce;
+    white-space: nowrap;
+}
+.bang-quan-tri tbody td {
+    padding: 10px 6px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3ece8;
+    background: #fff;
+    word-wrap: break-word;
+}
+.bang-quan-tri tbody tr:hover td {
+    background-color: #fdf8f5;
+}
+.bang-quan-tri tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.col-hoten     { width: 15%; }
+.col-cccd      { width: 14%; }
+.col-lienhe    { width: 22%; }
+.col-muc       { width: 5%; }
+.col-vaitro    { width: 16%; }
+.col-trangthai { width: 10%; }
+.col-lansai    { width: 5%; }
+.col-thaotac   { width: 13%; }
+
+.badge-status {
+    padding: 4px 8px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+}
+.badge-status.hoat_dong { background: #e6f4ea; color: #137333; }
+.badge-status.bi_khoa { background: #fce8e6; color: #c5221f; }
+.badge-status.cho_kich_hoat { background: #fef7e0; color: #b06000; }
+
+.o-nhap-ly-do {
+    font-size: 11.5px;
+    border-radius: 6px;
+    border: 1px solid #e0d5d0;
+    padding: 4px 6px;
+    width: 100%;
+}
+.o-nhap-ly-do:focus {
+    border-color: #d71f18;
+    box-shadow: 0 0 0 2px rgba(215, 31, 24, 0.12);
+    outline: 0;
+}
+.nut-hanh-dong {
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+.so-dinh-danh-tag {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #b8100f;
+    background: #fdecec;
+    padding: 2px 5px;
+    border-radius: 4px;
+    display: inline-block;
+}

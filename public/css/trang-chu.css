@@ -1,0 +1,191 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f6f3f1; color: #1f2937; font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif; }
+a { color: inherit; text-decoration: none; }
+svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.chua { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+
+.thanh-menu { position: sticky; top: 0; z-index: 10; background: #fff; box-shadow: 0 1px 8px rgba(0,0,0,.08); }
+.thanh-menu .chua { display: flex; align-items: center; gap: 28px; height: 64px; }
+.thuong-hieu { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #b8100f; }
+.thuong-hieu img { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; }
+.menu { display: flex; gap: 4px; flex: 1; }
+.menu a { padding: 8px 14px; border-radius: 8px; font-size: 15px; font-weight: 500; color: #4b5563; }
+.menu a:hover { background: #fdecec; color: #b8100f; }
+.menu a.dang-chon { color: #b8100f; font-weight: 600; background: #fdecec; }
+
+.tai-khoan { position: relative; }
+.tai-khoan summary { display: flex; align-items: center; gap: 10px; padding: 6px 10px; list-style: none; border-radius: 999px; cursor: pointer; }
+.tai-khoan summary::-webkit-details-marker { display: none; }
+.tai-khoan summary:hover { background: #f3f4f6; }
+.tai-khoan svg { width: 18px; height: 18px; }
+.chu-cai { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #b8100f; background: #ffe9a8; border: 2px solid #f2c200; }
+.tai-khoan .ten { font-size: 14px; font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.danh-sach { position: absolute; right: 0; top: 48px; min-width: 190px; padding: 6px; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.danh-sach a { display: block; padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+.danh-sach a:hover { background: #fdecec; color: #b8100f; }
+
+.nen-do {
+  color: #fff;
+  background:
+    url('/public/images/trong-dong.svg') right -120px center / 520px no-repeat,
+    linear-gradient(180deg, #b8100f, #8e0709);
+}
+.hero { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 32px; padding-bottom: 32px; }
+.hero-trai { display: flex; align-items: center; gap: 20px; }
+.anh-dai-dien { width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: #b8100f; background: #ffe9a8; border: 4px solid #f2c200; flex: none; }
+.loi-chao { margin: 0; font-size: 14px; opacity: .85; }
+.hero h1 { margin: 2px 0 8px; font-size: 28px; font-weight: 800; }
+.the-muc { display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 999px; background: #fff; color: #1f2937; font-size: 14px; font-weight: 500; }
+.the-muc b { width: 20px; height: 20px; border-radius: 50%; background: #d71f18; color: #ffd23f; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.hero-phai { display: flex; gap: 14px; }
+.the-qr { display: flex; align-items: center; gap: 12px; min-width: 220px; padding: 12px 16px; color: #3b2a14; font-size: 14px; line-height: 1.35; background: linear-gradient(135deg, #f6dcae, #efc98d); border: 1.5px solid #e2b567; border-radius: 14px; transition: transform .15s; }
+.the-qr:hover { transform: translateY(-2px); }
+.the-qr img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+.the-qr strong { font-size: 16px; }
+
+.than-trang { padding-top: 28px; padding-bottom: 40px; display: flex; flex-direction: column; gap: 24px; }
+.khoi { padding: 22px; background: #fff; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+.khoi h2 { margin: 0 0 18px; font-size: 20px; font-weight: 600; }
+.tieu-de-hang { display: flex; justify-content: space-between; align-items: baseline; }
+.tieu-de-hang a { font-size: 14px; color: #d71f18; }
+
+.luoi { display: grid; gap: 16px; }
+.luoi-3 { grid-template-columns: repeat(3, 1fr); }
+.luoi-4 { grid-template-columns: repeat(4, 1fr); }
+.luoi-5 { grid-template-columns: repeat(5, 1fr); }
+
+.the-dich-vu, .the-tien-ich { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 12px; text-align: center; font-size: 15px; font-weight: 500; border: 1px solid #f0e6e0; border-radius: 14px; transition: all .15s; }
+.the-dich-vu:hover, .the-tien-ich:hover { border-color: #d71f18; box-shadow: 0 6px 16px rgba(215,31,24,.15); transform: translateY(-2px); }
+.the-dich-vu i { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: radial-gradient(circle at 30% 25%, #ee3a2e, #b8100f); }
+.the-dich-vu i svg { width: 30px; height: 30px; }
+.the-dich-vu b { position: absolute; top: 10px; right: 10px; padding: 2px 10px; border-radius: 999px; background: #fdecec; color: #d71f18; font-size: 11px; font-weight: 600; }
+.the-tien-ich { flex-direction: row; justify-content: flex-start; padding: 16px 18px; }
+.the-tien-ich i { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #d71f18; background: #fdecec; flex: none; }
+.the-tien-ich i svg { width: 28px; height: 28px; }
+
+.the-so { padding: 22px 12px; text-align: center; background: #fdecec; border-radius: 14px; transition: transform .15s; }
+.the-so:hover { transform: translateY(-2px); }
+.the-so strong { display: block; font-size: 36px; color: #d71f18; }
+.the-so span { font-size: 14px; color: #4b5563; }
+
+.the-to-chuc { display: flex; align-items: center; gap: 16px; padding: 18px 22px; color: #fff; border-radius: 16px; background: linear-gradient(90deg, #e8261c, #cd1710); box-shadow: 0 6px 16px rgba(205,23,16,.28); }
+.icon-to-chuc { width: 56px; height: 56px; border-radius: 50%; background: #fff; color: #e0a800; display: flex; align-items: center; justify-content: center; flex: none; }
+.icon-to-chuc svg { width: 30px; height: 30px; }
+.chu-to-chuc { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.chu-to-chuc strong { font-size: 19px; }
+.chu-to-chuc em { font-size: 13px; opacity: .9; font-style: normal; }
+.nut-doi { padding: 10px 20px; border-radius: 10px; background: #fff; color: #d71f18; font-size: 14px; font-weight: 600; }
+
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 32px 40px; color: #fff; border-radius: 16px; background: url('/public/images/trong-dong.svg') right -60px center / 380px no-repeat, linear-gradient(135deg, #8e0709, #d71f18); }
+.banner-chu small { font-size: 15px; font-weight: 600; color: #ffe9a8; }
+.banner-chu strong { display: block; margin: 4px 0 8px; font-size: 34px; font-weight: 800; }
+.banner-chu p { margin: 0 0 16px; max-width: 420px; font-size: 15px; opacity: .92; }
+.nut-vang { display: inline-block; padding: 10px 24px; border-radius: 999px; background: linear-gradient(180deg, #ffe680, #f2b705); color: #5a2a00; font-size: 14px; font-weight: 800; }
+.banner img { width: 130px; height: 130px; border-radius: 50%; border: 4px solid #ffd23f; object-fit: cover; }
+
+.chan-trang { padding: 18px 0; font-size: 13px; color: #6b7280; border-top: 1px solid #e7dfdb; background: #fff; }
+.chan-trang .chua { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.chan-trang a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .luoi-4, .luoi-5 { grid-template-columns: repeat(2, 1fr); }
+  .luoi-3 { grid-template-columns: 1fr; }
+  .hero { flex-direction: column; align-items: flex-start; }
+  .hero-phai { width: 100%; flex-wrap: wrap; }
+  .the-qr { flex: 1; min-width: 180px; }
+  .banner { padding: 24px; }
+  .banner img { display: none; }
+}
+@media (max-width: 640px) {
+  .menu { display: none; }
+  .thanh-menu .chua { justify-content: space-between; }
+  .tai-khoan .ten { display: none; }
+  .hero h1 { font-size: 22px; }
+}
+.noi-dung-phai { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.cot-chuc-nang {
+  position: sticky; top: 84px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 12px; background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.cot-chuc-nang h3 { margin: 0 0 8px 12px; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #9ca3af; text-transform: uppercase; }
+.cot-chuc-nang a { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; font-size: 15px; color: #4b5563; }
+.cot-chuc-nang a svg { width: 22px; height: 22px; flex: none; }
+.cot-chuc-nang a span { display: flex; flex-direction: column; line-height: 1.3; }
+.cot-chuc-nang small { font-size: 11.5px; color: #9ca3af; }
+.cot-chuc-nang a:hover { background: #fdecec; color: #b8100f; }
+.cot-chuc-nang a.dang-chon { background: #fdecec; color: #b8100f; font-weight: 600; box-shadow: inset 3px 0 0 #d71f18; }
+@media (max-width: 800px) {
+  .bo-cuc-hai-cot { grid-template-columns: 1fr; }
+  .cot-chuc-nang { position: static; }
+}
+
+.cot-co-dinh {
+  position: fixed; top: 64px; left: 0; bottom: 0; width: 260px;
+  overflow-y: auto; border-radius: 0; z-index: 5;
+}
+.cot-co-dinh ~ main, .cot-co-dinh ~ section, .cot-co-dinh ~ footer { margin-left: 260px; }
+@media (max-width: 900px) {
+  .cot-co-dinh { position: static; width: auto; }
+  .cot-co-dinh ~ main, .cot-co-dinh ~ section, .cot-co-dinh ~ footer { margin-left: 0; }
+}
+/* Modal hiển thị Mã QR */
+.modal-qr {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; 
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-qr-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-qr-content h3 {
+  margin-bottom: 16px;
+  color: #b71c1c;
+}
+
+#qrcode-box {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.nut-dong {
+  background: #b71c1c;
+  color: #fff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.nut-dong:hover {
+  background: #9a0007;
+}
+
+#qrcode-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px auto;
+  min-height: 180px;
+}
+
+#qrcode-box img {
+  display: block;
+  margin: 0 auto;
+}

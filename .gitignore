@@ -6,3 +6,9 @@ public/uploads/*
 .DS_Store
 Thumbs.db
 .vscode/
+
+vendor/
+config/mail.php
+
+uploads_rieng/*
+!uploads_rieng/.gitkeep

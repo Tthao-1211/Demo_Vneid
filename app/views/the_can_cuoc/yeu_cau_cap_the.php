@@ -1,428 +1,838 @@
-<!-- app/views/the_can_cuoc/yeu_cau_cap_the.php -->
+
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Nhận dữ liệu từ Controller, đồng thời hỗ trợ tên biến cũ.
+$the = $the ?? $the_can_cuoc ?? [];
+$thong_bao_ket_qua = $thong_bao_ket_qua ?? null;
+$ds_yeu_cau_gan_day = $ds_yeu_cau_gan_day ?? [];
+
+$loaiYeuCauMacDinh = $loaiYeuCauMacDinh ?? '';
+$lyDoMacDinh = $lyDoMacDinh ?? '';
+
+$csrf_token = $csrf_token ?? '';
+
+$e = function ($value) {
+    return htmlspecialchars(
+        (string)($value ?? ''),
+        ENT_QUOTES,
+        'UTF-8'
+    );
+};
+
+$loaiYeuCauMap = [
+    'cap_moi' => 'Cấp mới',
+    'cap_doi' => 'Cấp đổi',
+    'cap_lai' => 'Cấp lại',
+    'bao_mat' => 'Báo mất thẻ'
+];
+
+$maVaiTro = (int)($_SESSION['ma_vai_tro'] ?? 0);
+$maNguoiDung = (int)($_SESSION['ma_nguoi_dung'] ?? 0);
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dịch vụ công: Yêu cầu cấp thẻ Căn cước - VNeID</title>
-    <link rel="stylesheet" href="/css/vneid-theme.css">
-    <link rel="stylesheet" href="/css/professional-form.css">
+
+    <title>VNeID - Yêu cầu cấp thẻ căn cước</title>
+
+    <!-- CSS dùng chung với trang chi tiết căn cước -->
+    <link rel="stylesheet" href="/public/css/trang-chu.css">
+    <link rel="stylesheet" href="/public/css/chi-tiet.css">
+
     <style>
-        body {
-            background-color: #E9EAE8 !important; margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: 'Times New Roman', Times, serif;
-        }
-        .boca-brand { text-align: center; color: #ffffff; margin-top: 20px; margin-bottom: 25px; }
-        .boca-title { font-size: 20px; font-weight: 700; text-transform: uppercase; margin: 5px 0; }
-        .boca-sub { font-size: 13px; color: #ffca2c; margin: 0; }
-
-        .vneid-form-container { 
-            width: 100%; max-width: 760px; background-color: #ffffff; 
-            padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); 
-            box-sizing: border-box; margin-bottom: 50px; position: relative; 
-        }
-        .btn-back-arrow { 
-            position: absolute; left: 40px; top: 40px; font-size: 18px; color: #555; 
-            cursor: pointer; background: #f5f5f7; padding: 8px 14px; border-radius: 6px; 
-            border: none; text-decoration: none; 
-        }
-        .vneid-section-title { 
-            text-align: center; color: #222222; font-size: 22px; font-weight: 700; 
-            margin-top: 10px; margin-bottom: 15px; 
-        }
-        .vneid-section-sub {
-            text-align: center; color: #64748b; font-size: 14px; margin-bottom: 30px; line-height: 1.5;
+        .vneid-form-container {
+            max-width: 850px;
         }
 
-        /* Biên nhận nộp hồ sơ thành công */
-        .receipt-card {
-            background: #f0fdf4;
-            border: 2px dashed #22c55e;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
+        .form-description {
             text-align: center;
+            color: #8e8e93;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.6;
         }
-        .receipt-icon { font-size: 40px; margin-bottom: 10px; }
-        .receipt-title { font-size: 18px; font-weight: 700; color: #15803d; margin-bottom: 8px; }
-        .receipt-code { 
-            display: inline-block; background: #ffffff; border: 1px solid #86efac; 
-            color: #166534; font-size: 18px; font-weight: 800; padding: 8px 18px; 
-            border-radius: 8px; margin: 10px 0; letter-spacing: 1px;
-        }
-        .receipt-desc { font-size: 13px; color: #374151; line-height: 1.6; }
 
-        .form-grid-custom { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-        .span-2 { grid-column: span 2; }
-        .form-group-custom { margin-bottom: 5px; }
-        .form-group-custom label { display: block; font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
-
-        input[type="text"], input[type="tel"], select, textarea {
-            width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1;
-            border-radius: 8px; font-size: 14px; box-sizing: border-box; font-family: inherit;
+        .form-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #e3261f;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f2f2f7;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: #e3261f; outline: none; box-shadow: 0 0 0 3px rgba(227, 38, 31, 0.15);
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            min-width: 0;
+        }
+
+        .form-group.span-2 {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #4b5563;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .required {
+            color: #e3261f;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #222;
+            background: #fff;
+        }
+
+        .form-group textarea {
+            min-height: 85px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e3261f;
+            box-shadow: 0 0 0 2px rgba(227, 38, 31, .1);
+        }
+
+        .form-group input[readonly] {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .form-note {
+            margin-top: 6px;
+            color: #8e8e93;
+            font-size: 12px;
         }
 
         .type-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
-            margin-bottom: 5px;
         }
+
         .type-option {
-            border: 1.5px solid #cbd5e1;
+            display: block;
+            padding: 16px 12px;
+            border: 1px solid #d1d5db;
             border-radius: 8px;
-            padding: 14px 10px;
-            text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
+            transition: .2s;
+            background: #fff;
         }
-        .type-option input { display: none; }
-        .type-option.active {
+
+        .type-option:hover {
             border-color: #e3261f;
-            background-color: #fffafb;
-            color: #e3261f;
-            font-weight: 700;
         }
-        .type-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-        .type-desc { font-size: 11px; color: #64748b; line-height: 1.3; }
+
+        .type-option.active {
+            border: 2px solid #e3261f;
+            background: #fff8f7;
+        }
+
+        .type-option input {
+            margin-right: 6px;
+            accent-color: #e3261f;
+        }
+
+        .type-title {
+            display: inline;
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .type-desc {
+            display: block;
+            margin-top: 8px;
+            color: #8e8e93;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .notice {
+            padding: 13px 15px;
+            margin: 18px 0;
+            border-radius: 8px;
+            background: #fef7e0;
+            color: #92400e;
+            font-size: 13px;
+            line-height: 1.6;
+        }
 
         .btn-submit {
-            display: block; width: 100%; padding: 14px; background-color: #e3261f; color: #ffffff;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(227, 38, 31, 0.2); transition: background-color 0.2s; margin-top: 15px;
+            background: #e3261f;
+            color: #fff;
         }
-        .btn-submit:hover { background-color: #c91e17; }
 
-        /* Lịch sử yêu cầu */
-        .history-section { margin-top: 35px; border-top: 1px solid #e2e8f0; padding-top: 25px; }
-        .history-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 15px; }
-        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .history-table th { background: #f8fafc; padding: 10px; text-align: left; color: #64748b; border-bottom: 1px solid #e2e8f0; }
-        .history-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-        .badge-status { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-processing { background: #dbeafe; color: #1e40af; }
-        .badge-done { background: #dcfce7; color: #166534; }
-        .success-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-        .success-actions a{display:flex;align-items:center;justify-content:center;padding:13px;border-radius:8px;text-decoration:none;font-weight:700;border:1px solid transparent}
-        .btn-success-close{background:#fff;color:#334155;border-color:#cbd5e1!important}
-        .btn-success-view{background:#e3261f;color:#fff}
-        .readonly-request{display:none;margin-top:18px;border:1px solid #e2e8f0;border-radius:10px;padding:18px;background:#f8fafc;color:#334155}
-        .readonly-request.show{display:block}
-        .readonly-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .readonly-field{padding:10px;background:#fff;border-radius:7px;border:1px solid #e2e8f0;font-size:13px}
-        .readonly-field strong{display:block;color:#64748b;margin-bottom:5px;font-size:12px}
-        @media(max-width:600px){.form-grid-custom,.readonly-grid,.success-actions{grid-template-columns:1fr}.span-2{grid-column:auto}.type-selector{grid-template-columns:1fr}}
-        /* Bố cục Web quản trị dữ liệu - ghi đè kiểu card/app mobile của trang dịch vụ cũ */
-        body {
+        .btn-submit:hover {
+            background: #c91e17;
+            color: #fff;
+        }
+
+        .receipt-card {
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px dashed #22c55e;
+            border-radius: 10px;
+            background: #f0fdf4;
+        }
+
+        .receipt-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .receipt-title {
+            color: #15803d;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .receipt-code {
+            display: inline-block;
+            padding: 9px 18px;
+            margin: 10px 0;
+            border: 1px solid #86efac;
+            border-radius: 7px;
+            background: #fff;
+            color: #166534;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .receipt-desc {
+            color: #374151;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .readonly-request {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .readonly-request.show {
             display: block;
-            padding: 0;
-            min-height: 100vh;
-            background: #E9EAE8 !important;
         }
-        .boca-brand {
-            width: min(1180px, calc(100% - 32px));
-            margin: 18px auto 10px;
-            padding: 14px 20px;
-            border: 1px solid #d2d4d2;
-            border-top: 5px solid #b91c1c;
-            border-radius: 10px 10px 6px 6px;
+
+        .readonly-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .readonly-field {
+            padding: 11px;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
             background: #fff;
-            color: #222;
-            text-align: left;
+            font-size: 13px;
+            overflow-wrap: anywhere;
         }
-        .boca-title {
-            color: #b91c1c;
+
+        .readonly-field.span-2 {
+            grid-column: span 2;
         }
-        .boca-sub {
+
+        .readonly-field strong {
+            display: block;
+            margin-bottom: 5px;
             color: #64748b;
+            font-size: 12px;
         }
-        .vneid-form-container {
-            width: min(1180px, calc(100% - 32px)) !important;
-            max-width: 1180px !important;
-            min-height: auto !important;
-            margin: 10px auto 32px !important;
-            padding: 24px 30px 30px !important;
-            border-radius: 10px !important;
-            box-shadow: 0 10px 24px rgba(36, 40, 38, .10) !important;
-        }
-        .btn-back-arrow {
-            position: static;
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px !important;
-        }
-        .vneid-section-title {
-            text-align: left;
-            color: #b91c1c;
-            font-size: 26px;
-            margin: 18px 0 8px;
-            border-bottom: 1px solid #e4e6e4;
-            padding-bottom: 14px;
-        }
-        .vneid-section-sub {
-            text-align: left;
-            margin-bottom: 22px;
-        }
-        .type-selector {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-        .type-option {
-            border-radius: 8px;
-            min-height: 94px;
-            background: #fff;
-        }
+
         .history-section {
-            margin-top: 24px;
-            background: #fff;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
         }
+
+        .history-title {
+            margin-bottom: 15px;
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .history-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
         .history-table {
-            border: 0;
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
         }
+
         .history-table th {
-            background: #a31515 !important;
-            color: #fff !important;
-            text-transform: uppercase;
-            letter-spacing: .2px;
+            padding: 11px;
+            background: #f3f4f6;
+            color: #4b5563;
+            text-align: left;
+            white-space: nowrap;
         }
-        @media(max-width:760px) {
-            .boca-brand,
-            .vneid-form-container {
-                width: calc(100% - 20px) !important;
-                margin-left: 10px !important;
-                margin-right: 10px !important;
+
+        .history-table td {
+            padding: 11px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-rejected {
+            background: #fce8e6;
+            color: #c5221f;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid,
+            .type-selector,
+            .readonly-grid {
+                grid-template-columns: 1fr;
             }
-            .vneid-form-container {
-                padding: 18px 14px 22px !important;
-                border-radius: 8px !important;
-            }
-            .vneid-section-title {
-                font-size: 21px;
-            }
-            .form-grid-custom,
-            .readonly-grid,
-            .success-actions {
-                grid-template-columns: 1fr !important;
-            }
-            .span-2 {
-                grid-column: auto !important;
-            }
-            .type-selector {
-                grid-template-columns: 1fr !important;
+
+            .form-group.span-2,
+            .readonly-field.span-2 {
+                grid-column: auto;
             }
         }
     </style>
 </head>
 
 <body>
-    <?php xuatThanhChuyenVaiTroDemo(); ?>
-    <div class="boca-brand">
-        <div class="boca-title">Bộ Công An</div>
-        <div class="boca-sub">Trung tâm dữ liệu Quốc gia về dân cư</div>
-    </div>
+    <?php require __DIR__ . '/../nguoi_dung/thanh_menu.php'; ?>
 
     <div class="vneid-form-container">
-        <a class="btn-back-arrow" href="/">← Thoát</a>
-        <h2 class="vneid-section-title">Yêu cầu Cấp thẻ Căn cước công dân</h2>
-        <div class="vneid-section-sub">Dịch vụ công trực tuyến mức độ 4 mô phỏng trên nền tảng VNeID</div>
+
+        <a href="/the_can_cuoc/chi_tiet" class="btn-back-arrow">
+            ← Quay lại thông tin căn cước
+        </a>
+
+        <h2 class="vneid-section-title">
+            Yêu cầu cấp thẻ căn cước
+        </h2>
+
+        <p class="form-description">
+            Dịch vụ công trực tuyến mô phỏng trên nền tảng VNeID
+        </p>
 
         <?php if (!empty($thong_bao_ket_qua)): ?>
+
+            <!-- Biên nhận sau khi nộp hồ sơ -->
             <div class="receipt-card">
                 <div class="receipt-icon">🎉</div>
-                <div class="receipt-title">Hồ sơ đã được tiếp nhận thành công!</div>
+
+                <div class="receipt-title">
+                    Hồ sơ đã được tiếp nhận thành công!
+                </div>
+
                 <div>Mã hồ sơ điện tử:</div>
-                <div class="receipt-code"><?php echo htmlspecialchars($thong_bao_ket_qua['ma_ho_so']); ?></div>
+
+                <div class="receipt-code">
+                    <?= $e($thong_bao_ket_qua['ma_ho_so'] ?? '') ?>
+                </div>
+
                 <div class="receipt-desc">
-                    Hồ sơ của công dân <strong><?php echo htmlspecialchars($thong_bao_ket_qua['ho_ten']); ?></strong> (Số định danh: <?php echo htmlspecialchars($thong_bao_ket_qua['so_cccd']); ?>) đã được chuyển đến Cơ quan Công an thụ lý.<br>
-                    Thời gian tiếp nhận: <?php echo htmlspecialchars($thong_bao_ket_qua['ngay_tiep_nhan']); ?>. Thời gian xử lý dự kiến: 7 ngày làm việc.
+                    Hồ sơ của công dân
+                    <strong>
+                        <?= $e($thong_bao_ket_qua['ho_ten'] ?? '') ?>
+                    </strong>
+                    (Số định danh:
+                    <?= $e($thong_bao_ket_qua['so_dinh_danh']
+                        ?? $thong_bao_ket_qua['so_cccd']
+                        ?? '') ?>)
+                    đã được chuyển đến cơ quan Công an thụ lý.
+                    <br>
+
+                    Thời gian tiếp nhận:
+                    <?= $e($thong_bao_ket_qua['ngay_tiep_nhan'] ?? '') ?>.
                 </div>
             </div>
-            <div class="success-actions">
-                <a class="btn-success-close" href="/">Đóng</a>
-                <a class="btn-success-view" href="#yeu-cau-da-nop" onclick="hienYeuCauDaNop(); return false;">Xem thay đổi</a>
+
+            <div class="vneid-action-bar">
+                <a href="/the_can_cuoc/chiTiet"
+                   class="btn-action btn-close-home">
+                    Quay lại
+                </a>
+
+                <button type="button"
+                        class="btn-action btn-request-card"
+                        onclick="hienYeuCauDaNop()">
+                    Xem thông tin đã gửi
+                </button>
             </div>
+
             <div class="readonly-request" id="yeu-cau-da-nop">
-                <h3 style="margin-top:0;text-align:center">Thông tin yêu cầu đã gửi</h3>
+                <h3 style="margin-top:0;text-align:center">
+                    Thông tin yêu cầu đã gửi
+                </h3>
+
                 <div class="readonly-grid">
-                    <div class="readonly-field"><strong>Mã hồ sơ</strong><?php echo e($thong_bao_ket_qua['ma_ho_so']); ?></div>
-                    <div class="readonly-field"><strong>Loại thủ tục</strong><?php echo e($thong_bao_ket_qua['loai_yeu_cau'] === 'cap_moi' ? 'Cấp mới' : ($thong_bao_ket_qua['loai_yeu_cau'] === 'cap_doi' ? 'Cấp đổi' : ($thong_bao_ket_qua['loai_yeu_cau'] === 'cap_lai' ? 'Cấp lại' : 'Báo mất thẻ'))); ?></div>
-                    <div class="readonly-field"><strong>Họ tên</strong><?php echo e($thong_bao_ket_qua['ho_ten']); ?></div>
-                    <div class="readonly-field"><strong>Số CCCD</strong><?php echo e($thong_bao_ket_qua['so_cccd']); ?></div>
-                    <div class="readonly-field"><strong>Số điện thoại</strong><?php echo e($thong_bao_ket_qua['so_dien_thoai']); ?></div>
-                    <div class="readonly-field"><strong>Hình thức nhận</strong><?php echo e($thong_bao_ket_qua['hinh_thuc_nhan'] === 'buu_dien' ? 'Bưu điện' : 'Trực tiếp'); ?></div>
-                    <div class="readonly-field span-2"><strong>Địa chỉ nhận</strong><?php echo e($thong_bao_ket_qua['dia_chi_nhan'] ?: 'Nhận trực tiếp tại cơ quan Công an'); ?></div>
-                    <div class="readonly-field span-2"><strong>Lý do đề nghị</strong><?php echo e($thong_bao_ket_qua['ly_do']); ?></div>
-                    <div class="readonly-field span-2"><strong>Ghi chú</strong><?php echo e($thong_bao_ket_qua['ghi_chu'] ?: 'Không có ghi chú'); ?></div>
+
+                    <div class="readonly-field">
+                        <strong>Mã hồ sơ</strong>
+                        <?= $e($thong_bao_ket_qua['ma_ho_so'] ?? '') ?>
+                    </div>
+
+                    <div class="readonly-field">
+                        <strong>Loại thủ tục</strong>
+                        <?= $e(
+                            $loaiYeuCauMap[
+                                $thong_bao_ket_qua['loai_yeu_cau'] ?? ''
+                            ] ?? 'Chưa xác định'
+                        ) ?>
+                    </div>
+
+                    <div class="readonly-field">
+                        <strong>Họ tên</strong>
+                        <?= $e($thong_bao_ket_qua['ho_ten'] ?? '') ?>
+                    </div>
+
+                    <div class="readonly-field">
+                        <strong>Số định danh</strong>
+                        <?= $e(
+                            $thong_bao_ket_qua['so_dinh_danh']
+                            ?? $thong_bao_ket_qua['so_cccd']
+                            ?? ''
+                        ) ?>
+                    </div>
+
+                    <div class="readonly-field">
+                        <strong>Số điện thoại</strong>
+                        <?= $e($thong_bao_ket_qua['so_dien_thoai'] ?? '') ?>
+                    </div>
+
+                    <div class="readonly-field">
+                        <strong>Hình thức nhận</strong>
+                        <?= ($thong_bao_ket_qua['hinh_thuc_nhan'] ?? '') === 'buu_dien'
+                            ? 'Bưu điện'
+                            : 'Trực tiếp' ?>
+                    </div>
+
+                    <div class="readonly-field span-2">
+                        <strong>Địa chỉ nhận</strong>
+                        <?= $e(
+                            $thong_bao_ket_qua['dia_chi_nhan']
+                            ?? 'Nhận trực tiếp tại cơ quan Công an'
+                        ) ?>
+                    </div>
+
+                    <div class="readonly-field span-2">
+                        <strong>Lý do đề nghị</strong>
+                        <?= $e($thong_bao_ket_qua['ly_do'] ?? '') ?>
+                    </div>
+
+                    <div class="readonly-field span-2">
+                        <strong>Ghi chú</strong>
+                        <?= $e(
+                            $thong_bao_ket_qua['ghi_chu']
+                            ?? 'Không có ghi chú'
+                        ) ?>
+                    </div>
+
                 </div>
             </div>
+
         <?php else: ?>
 
-        <form method="POST" action="/the_can_cuoc/yeu_cau_cap_the<?php echo $the_can_cuoc ? '?id=' . urlencode((string)$the_can_cuoc['id']) : ''; ?>">
-            <input type="hidden" name="ma_csrf" value="<?php echo e(taoMaCsrf()); ?>">
-            <div class="form-grid-custom">
+            <div class="notice">
+                <strong>Lưu ý:</strong>
+                Vui lòng chọn đúng loại thủ tục và cung cấp thông tin liên hệ
+                chính xác. Hồ sơ sẽ được chuyển đến cán bộ có thẩm quyền
+                để xem xét và xử lý.
+            </div>
 
-                <!-- 1. Chọn loại yêu cầu cấp thẻ -->
-                <div class="form-group-custom span-2">
-                    <label>Loại thủ tục đề nghị cấp thẻ (*):</label>
-                    <div class="type-selector">
-                        <label class="type-option <?php echo ($loaiYeuCauMacDinh === '' || $loaiYeuCauMacDinh === 'cap_moi') ? 'active' : ''; ?>" onclick="selectType(this)">
-                            <input type="radio" name="loai_yeu_cau" value="cap_moi" <?php echo $loaiYeuCauMacDinh === 'cap_moi' ? 'checked' : ($loaiYeuCauMacDinh === '' ? 'checked' : ''); ?>>
-                            <div class="type-title">Cấp mới</div>
-                            <div class="type-desc">Công dân từ đủ 14 tuổi hoặc chưa từng có thẻ CCCD</div>
+            <form method="POST"
+                  action="/the_can_cuoc/yeu_cau_cap_the"
+                  id="formCapThe">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="<?= $e($csrf_token) ?>">
+
+                <h3 class="form-section-title">
+                    I. Loại thủ tục đề nghị
+                </h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group span-2">
+                        <label>
+                            Loại thủ tục đề nghị cấp thẻ
+                            <span class="required">*</span>
                         </label>
-                        <label class="type-option <?php echo $loaiYeuCauMacDinh === 'cap_doi' ? 'active' : ''; ?>" onclick="selectType(this)">
-                            <input type="radio" name="loai_yeu_cau" value="cap_doi" <?php echo $loaiYeuCauMacDinh === 'cap_doi' ? 'checked' : ''; ?>>
-                            <div class="type-title">Cấp đổi</div>
-                            <div class="type-desc">Thẻ hết hạn, hỏng thẻ, hoặc đổi thông tin cá nhân</div>
-                        </label>
-                        <label class="type-option <?php echo $loaiYeuCauMacDinh === 'cap_lai' ? 'active' : ''; ?>" onclick="selectType(this)">
-                            <input type="radio" name="loai_yeu_cau" value="cap_lai" <?php echo $loaiYeuCauMacDinh === 'cap_lai' ? 'checked' : ''; ?>>
-                            <div class="type-title">Cấp lại</div>
-                            <div class="type-desc">Bị mất thẻ căn cước (tự động khóa thẻ cũ)</div>
-                        </label>
-                        <label class="type-option <?php echo $loaiYeuCauMacDinh === 'bao_mat' ? 'active' : ''; ?>" onclick="selectType(this)">
-                            <input type="radio" name="loai_yeu_cau" value="bao_mat" <?php echo $loaiYeuCauMacDinh === 'bao_mat' ? 'checked' : ''; ?>>
-                            <div class="type-title">Báo mất thẻ</div>
-                            <div class="type-desc">Gửi yêu cầu khóa thẻ và báo mất cho cán bộ xử lý</div>
-                        </label>
+
+                        <div class="type-selector">
+
+                            <label class="type-option <?= ($loaiYeuCauMacDinh === '' || $loaiYeuCauMacDinh === 'cap_moi') ? 'active' : '' ?>">
+                                <input type="radio"
+                                       name="loai_yeu_cau"
+                                       value="cap_moi"
+                                       <?= ($loaiYeuCauMacDinh === '' || $loaiYeuCauMacDinh === 'cap_moi') ? 'checked' : '' ?>
+                                       onchange="selectType(this)">
+
+                                <span class="type-title">Cấp mới</span>
+
+                                <span class="type-desc">
+                                    Công dân chưa từng được cấp thẻ căn cước.
+                                </span>
+                            </label>
+
+                            <label class="type-option <?= $loaiYeuCauMacDinh === 'cap_doi' ? 'active' : '' ?>">
+                                <input type="radio"
+                                       name="loai_yeu_cau"
+                                       value="cap_doi"
+                                       <?= $loaiYeuCauMacDinh === 'cap_doi' ? 'checked' : '' ?>
+                                       onchange="selectType(this)">
+
+                                <span class="type-title">Cấp đổi</span>
+
+                                <span class="type-desc">
+                                    Thẻ hết hạn, hư hỏng hoặc cần thay đổi thông tin.
+                                </span>
+                            </label>
+
+                            <label class="type-option <?= $loaiYeuCauMacDinh === 'cap_lai' ? 'active' : '' ?>">
+                                <input type="radio"
+                                       name="loai_yeu_cau"
+                                       value="cap_lai"
+                                       <?= $loaiYeuCauMacDinh === 'cap_lai' ? 'checked' : '' ?>
+                                       onchange="selectType(this)">
+
+                                <span class="type-title">Cấp lại</span>
+
+                                <span class="type-desc">
+                                    Đề nghị cấp lại do bị mất thẻ căn cước.
+                                </span>
+                            </label>
+
+                            <label class="type-option <?= $loaiYeuCauMacDinh === 'bao_mat' ? 'active' : '' ?>">
+                                <input type="radio"
+                                       name="loai_yeu_cau"
+                                       value="bao_mat"
+                                       <?= $loaiYeuCauMacDinh === 'bao_mat' ? 'checked' : '' ?>
+                                       onchange="selectType(this)">
+
+                                <span class="type-title">Báo mất thẻ</span>
+
+                                <span class="type-desc">
+                                    Thông báo mất thẻ để cán bộ xem xét xử lý.
+                                </span>
+                            </label>
+
+                        </div>
                     </div>
+
                 </div>
 
-                <!-- 2. Thông tin công dân -->
-                <div class="form-group-custom">
-                    <label>Số định danh cá nhân (12 chữ số) (*):</label>
-                    <input type="text" name="so_cccd" maxlength="12" pattern="\d{12}" required 
-                           placeholder="Nhập 12 chữ số CCCD" 
-                           value="<?php echo htmlspecialchars($the_can_cuoc['so_cccd'] ?? ''); ?>">
+                <h3 class="form-section-title">
+                    II. Thông tin công dân
+                </h3>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="so_dinh_danh">
+                            Số định danh cá nhân
+                        </label>
+
+                        <input type="text"
+                               id="so_dinh_danh"
+                               name="so_dinh_danh"
+                               maxlength="12"
+                               value="<?= $e($the['so_dinh_danh'] ?? '') ?>"
+                               readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ho_ten">
+                            Họ và tên công dân
+                        </label>
+
+                        <input type="text"
+                               id="ho_ten"
+                               name="ho_ten"
+                               value="<?= $e($the['ho_ten'] ?? '') ?>"
+                               readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="so_dien_thoai">
+                            Số điện thoại liên hệ
+                            <span class="required">*</span>
+                        </label>
+
+                        <input type="tel"
+                               id="so_dien_thoai"
+                               name="so_dien_thoai"
+                               maxlength="15"
+                               pattern="[0-9]{10,15}"
+                               placeholder="Ví dụ: 0912345678"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hinh_thuc_nhan">
+                            Hình thức nhận thẻ
+                            <span class="required">*</span>
+                        </label>
+
+                        <select name="hinh_thuc_nhan"
+                                id="hinh_thuc_nhan"
+                                onchange="toggleDiaChiNhan(this.value)"
+                                required>
+
+                            <option value="truc_tiep">
+                                Nhận trực tiếp tại cơ quan Công an
+                            </option>
+
+                            <option value="buu_dien">
+                                Chuyển phát qua bưu điện
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group span-2"
+                         id="diaChiWrapper"
+                         style="display:none">
+
+                        <label for="dia_chi_nhan">
+                            Địa chỉ nhận thẻ qua bưu điện
+                            <span class="required">*</span>
+                        </label>
+
+                        <textarea name="dia_chi_nhan"
+                                  id="dia_chi_nhan"
+                                  placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố"><?= $e($the['noi_thuong_tru'] ?? '') ?></textarea>
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="ly_do">
+                            Lý do đề nghị
+                            <span class="required">*</span>
+                        </label>
+
+                        <textarea name="ly_do"
+                                  id="ly_do"
+                                  required
+                                  placeholder="Trình bày lý do đề nghị cấp thẻ..."><?= $e($lyDoMacDinh) ?></textarea>
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label for="ghi_chu">
+                            Ghi chú thêm
+                        </label>
+
+                        <textarea name="ghi_chu"
+                                  id="ghi_chu"
+                                  placeholder="Thông tin bổ sung cho cán bộ xử lý..."></textarea>
+                    </div>
+
                 </div>
 
-                <div class="form-group-custom">
-                    <label>Họ và tên công dân (*):</label>
-                    <input type="text" name="ho_ten" required 
-                           placeholder="Họ và tên viết hoa" 
-                           value="<?php echo htmlspecialchars($the_can_cuoc['ho_ten'] ?? ''); ?>">
+                <div class="vneid-action-bar">
+
+                    <button type="submit"
+                            class="btn-action btn-submit">
+                        Nộp hồ sơ trực tuyến
+                    </button>
                 </div>
 
-                <div class="form-group-custom">
-                    <label>Số điện thoại liên hệ (*):</label>
-                    <input type="tel" name="so_dien_thoai" required placeholder="Ví dụ: 0912345678">
-                </div>
-
-                <div class="form-group-custom">
-                    <label>Hình thức nhận thẻ (*):</label>
-                    <select name="hinh_thuc_nhan" id="hinhThucNhanSelect" onchange="toggleDiaChiNhan(this.value)">
-                        <option value="truc_tiep">Nhận trực tiếp tại Cơ quan Công an</option>
-                        <option value="buu_dien">Chuyển phát qua bưu điện về tận nhà</option>
-                    </select>
-                </div>
-
-                <div class="form-group-custom span-2" id="diaChiWrapper" style="display: none;">
-                    <label>Địa chỉ nhận thẻ qua bưu điện (*):</label>
-                    <input type="text" name="dia_chi_nhan" id="diaChiInput" 
-                           placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                           value="<?php echo htmlspecialchars($the_can_cuoc['noi_thuong_tru'] ?? ''); ?>">
-                </div>
-
-                <div class="form-group-custom span-2">
-                    <label>Lý do đề nghị cấp thẻ (*):</label>
-                    <input type="text" name="ly_do" id="lyDoInput" required value="<?php echo e($lyDoMacDinh); ?>" placeholder="Ví dụ: Thẻ hết hạn sử dụng theo độ tuổi quy định...">
-                </div>
-
-                <div class="form-group-custom span-2">
-                    <label>Ghi chú thêm (nếu có):</label>
-                    <textarea name="ghi_chu" placeholder="Thông tin bổ sung cho cán bộ thụ lý hồ sơ..."></textarea>
-                </div>
-
-                <div class="span-2">
-                    <button type="submit" class="btn-submit">Nộp hồ sơ trực tuyến</button>
-                </div>
-
-            </div>
-        </form>
+            </form>
 
         <?php endif; ?>
 
-        <!-- Lịch sử các yêu cầu đã gửi -->
+        <!-- Lịch sử yêu cầu cấp thẻ -->
         <?php if (empty($thong_bao_ket_qua) && !empty($ds_yeu_cau_gan_day)): ?>
+
             <div class="history-section">
-                <div class="history-title">📋 Hồ sơ yêu cầu cấp thẻ gần đây</div>
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Mã hồ sơ</th>
-                            <th>Loại thủ tục</th>
-                            <th>Ngày nộp</th>
-                            <th>Hình thức</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($ds_yeu_cau_gan_day as $yc): ?>
+
+                <h3 class="history-title">
+                    Lịch sử yêu cầu cấp thẻ
+                </h3>
+
+                <div class="history-table-wrapper">
+                    <table class="history-table">
+
+                        <thead>
                             <tr>
-                                <td style="font-weight: 700; color: #1e40af;"><?php echo htmlspecialchars($yc['ma_ho_so']); ?></td>
-                                <td>
-                                    <?php 
-                                        if ($yc['loai_yeu_cau'] === 'cap_moi') echo 'Cấp mới';
-                                        elseif ($yc['loai_yeu_cau'] === 'cap_doi') echo 'Cấp đổi';
-                                        elseif ($yc['loai_yeu_cau'] === 'cap_lai') echo 'Cấp lại';
-                                        elseif ($yc['loai_yeu_cau'] === 'bao_mat') echo 'Báo mất thẻ';
-                                    ?>
-                                </td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($yc['ngay_yeu_cau'])); ?></td>
-                                <td><?php echo $yc['hinh_thuc_nhan'] === 'buu_dien' ? 'Bưu điện' : 'Trực tiếp'; ?></td>
-                                <td>
-                                    <?php if ($yc['trang_thai'] === 'cho_tiep_nhan'): ?>
-                                        <span class="badge-status badge-pending">Chờ tiếp nhận</span>
-                                    <?php elseif ($yc['trang_thai'] === 'dang_xu_ly'): ?>
-                                        <span class="badge-status badge-processing">Đang xử lý</span>
-                                    <?php else: ?>
-                                        <span class="badge-status badge-done">Hoàn thành</span>
-                                    <?php endif; ?>
-                                </td>
+                                <th>Mã hồ sơ</th>
+                                <th>Loại thủ tục</th>
+                                <th>Ngày nộp</th>
+                                <th>Hình thức</th>
+                                <th>Trạng thái</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+
+                        <tbody>
+
+                            <?php foreach ($ds_yeu_cau_gan_day as $yc): ?>
+
+                                <?php
+                                $loai = $yc['loai_yeu_cau'] ?? '';
+                                $trangThai = $yc['trang_thai'] ?? '';
+
+                                $classTrangThai = 'badge-pending';
+
+                                if ($trangThai === 'dang_xu_ly') {
+                                    $classTrangThai = 'badge-processing';
+                                } elseif ($trangThai === 'hoan_thanh') {
+                                    $classTrangThai = 'badge-done';
+                                } elseif ($trangThai === 'tu_choi') {
+                                    $classTrangThai = 'badge-rejected';
+                                }
+
+                                $tenTrangThai = [
+                                    'cho_tiep_nhan' => 'Chờ tiếp nhận',
+                                    'dang_xu_ly' => 'Đang xử lý',
+                                    'hoan_thanh' => 'Hoàn thành',
+                                    'tu_choi' => 'Từ chối'
+                                ][$trangThai] ?? 'Chưa xác định';
+                                ?>
+
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            <?= $e($yc['ma_ho_so'] ?? '') ?>
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <?= $e($loaiYeuCauMap[$loai] ?? 'Chưa xác định') ?>
+                                    </td>
+
+                                    <td>
+                                        <?php
+                                        $ngay = $yc['ngay_yeu_cau'] ?? '';
+
+                                        echo $ngay && strtotime($ngay)
+                                            ? date('d/m/Y H:i', strtotime($ngay))
+                                            : 'Chưa cập nhật';
+                                        ?>
+                                    </td>
+
+                                    <td>
+                                        <?= ($yc['hinh_thuc_nhan'] ?? '') === 'buu_dien'
+                                            ? 'Bưu điện'
+                                            : 'Trực tiếp' ?>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge-status <?= $classTrangThai ?>">
+                                            <?= $e($tenTrangThai) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+
+                            <?php endforeach; ?>
+
+                        </tbody>
+
+                    </table>
+                </div>
+
             </div>
+
         <?php endif; ?>
+
     </div>
 
     <script>
         function hienYeuCauDaNop() {
             const panel = document.getElementById('yeu-cau-da-nop');
+
             if (panel) {
                 panel.classList.add('show');
-                panel.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+
+                panel.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }
+        }
+        function selectType(radio) {
+            document.querySelectorAll('.type-option').forEach(function(option) {
+                option.classList.remove('active');
+            });
+
+            radio.closest('.type-option').classList.add('active');
+
+            const lyDoInput = document.getElementById('ly_do');
+
+            const lyDoMacDinh = {
+                cap_moi: 'Đề nghị cấp thẻ căn cước lần đầu.',
+                cap_doi: 'Đề nghị cấp đổi thẻ căn cước.',
+                cap_lai: 'Bị mất thẻ căn cước, đề nghị cấp lại.',
+                bao_mat: 'Thông báo mất thẻ căn cước.'
+            };
+
+            if (lyDoInput) {
+                lyDoInput.value = lyDoMacDinh[radio.value] || '';
             }
         }
 
-        function selectType(el) {
-            document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('active'));
-            el.classList.add('active');
-            const radio = el.querySelector('input[type="radio"]');
-            radio.checked = true;
-
-            const lyDoInput = document.getElementById('lyDoInput');
-            if (radio.value === 'cap_moi') {
-                lyDoInput.value = 'Đủ 14 tuổi, đề nghị cấp thẻ căn cước lần đầu.';
-            } else if (radio.value === 'cap_doi') {
-                lyDoInput.value = 'Thẻ căn cước hết hạn sử dụng / đề nghị cấp đổi.';
-            } else if (radio.value === 'cap_lai') {
-                lyDoInput.value = 'Bị mất thẻ căn cước công dân, đề nghị cấp lại.';
-            } else if (radio.value === 'bao_mat') {
-                lyDoInput.value = 'Báo mất thẻ căn cước công dân, đề nghị khóa thẻ.';
-            }
-        }
-
-        function toggleDiaChiNhan(val) {
+        function toggleDiaChiNhan(value) {
             const wrapper = document.getElementById('diaChiWrapper');
-            const input = document.getElementById('diaChiInput');
-            if (val === 'buu_dien') {
+            const input = document.getElementById('dia_chi_nhan');
+
+            if (value === 'buu_dien') {
                 wrapper.style.display = 'block';
                 input.required = true;
             } else {
@@ -430,6 +840,16 @@
                 input.required = false;
             }
         }
+
+        // Khởi tạo trạng thái địa chỉ nhận khi tải trang.
+        document.addEventListener('DOMContentLoaded', function() {
+            const hinhThuc = document.getElementById('hinh_thuc_nhan');
+
+            if (hinhThuc) {
+                toggleDiaChiNhan(hinhThuc.value);
+            }
+        });
     </script>
+
 </body>
 </html>

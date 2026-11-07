@@ -3,6 +3,7 @@
 
 require_once __DIR__ . '/../models/DichVu.php';
 require_once __DIR__ . '/../models/HoSoDichVu.php';
+require_once __DIR__ . '/../models/ThongBao.php';
 
 class DichVuController {
     private $model_dich_vu;
@@ -49,7 +50,15 @@ class DichVuController {
             }
 
             $this->model_ho_so->themMoi($ma_nguoi_dung, $ma_dich_vu, $noi_dung, $tep_dinh_kem);
-            chuyenHuong('Mo_phong_app_vneid/dich_vu/danh_sach');
+            global $pdo;
+            try {
+                (new ThongBao($pdo))->guiChoCanBo(
+                    ThongBao::LOAI_DICH_VU_CONG,
+                    'Có hồ sơ dịch vụ công mới',
+                    ($_SESSION['ho_ten'] ?? 'Công dân') . ' vừa nộp hồ sơ, đang chờ xử lý.'
+                );
+            } catch (PDOException $e) { /* không để lỗi thông báo làm hỏng việc nộp hồ sơ */ }
+            chuyenHuong('dich_vu/danh_sach');
         }
 
         $ds_dich_vu = $this->model_dich_vu->layDanhSach();
@@ -68,7 +77,7 @@ class DichVuController {
             $ma_can_bo = $_SESSION['ma_nguoi_dung'];
 
             $this->model_ho_so->capNhatTrangThai($ma_ho_so, $trang_thai, $ghi_chu, $ma_can_bo);
-            chuyenHuong('Mo_phong_app_vneid/dich_vu/ds_ho_so_can_xu_ly');
+            chuyenHuong('dich_vu/ds_ho_so_can_xu_ly');
         }
 
         $ds_ho_so = $this->model_ho_so->layDanhSachCanBo();

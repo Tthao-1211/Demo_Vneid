@@ -1,101 +1,307 @@
+<?php
+$yeu_cau   = $yeu_cau ?? [];
+$noi_dung  = $noi_dung ?? [];
+$thong_bao = $thong_bao ?? '';
+$loi       = $loi ?? '';
+
+$nhanTrangThai = [
+    'da_nop'      => ['Đã nộp', 'badge-pending'],
+    'dang_xu_ly'  => ['Đang xử lý', 'badge-processing'],
+    'can_bo_sung' => ['Cần bổ sung', 'badge-supplement'],
+    'da_duyet'    => ['Đã duyệt', 'badge-approved'],
+    'tu_choi'     => ['Từ chối', 'badge-rejected'],
+];
+$tt = $yeu_cau['trang_thai'] ?? '';
+[$nhan_tt, $lop_tt] = $nhanTrangThai[$tt] ?? [$tt, 'badge-pending'];
+$da_xu_ly = in_array($tt, ['da_duyet', 'tu_choi'], true);
+// Loại yêu cầu: điều chỉnh -> nút "Cập nhật", cấp đổi -> nút "Duyệt"
+$la_dieu_chinh = mb_stripos($yeu_cau['ten_dich_vu'] ?? '', 'điều chỉnh', 0, 'UTF-8') !== false;
+
+$nhanTruong = [
+    'ho_ten' => 'Họ và tên',
+    'ngay_sinh' => 'Ngày sinh',
+    'gioi_tinh' => 'Giới tính',
+    'quoc_tich' => 'Quốc tịch',
+    'dan_toc' => 'Dân tộc',
+    'ton_giao' => 'Tôn giáo',
+    'que_quan' => 'Quê quán',
+    'noi_thuong_tru' => 'Nơi thường trú',
+    'tinh_thanh' => 'Tỉnh/Thành phố',
+    'dac_diem_nhan_dang' => 'Đặc điểm nhận dạng',
+    'noi_cap' => 'Nơi cấp',
+    'ly_do' => 'Lý do',
+];
+
+$chuanHoa = function ($v) {
+    if (is_array($v)) return json_encode($v, JSON_UNESCAPED_UNICODE);
+    return trim((string)$v);
+};
+$dinhDangNgay = function ($v) {
+    if ($v !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $v) && ($ts = strtotime($v)) !== false) {
+        return date('d/m/Y', $ts);
+    }
+    return $v;
+};
+
+// ----- Bản gốc để so sánh (chỉ dùng cho yêu cầu điều chỉnh) -----
+// Nếu yêu cầu đã được cập nhật thì controller đã lưu ảnh chụp bản gốc trong __ban_goc
+$the_hien_tai = $the_hien_tai ?? [];
+$co_anh_chup  = isset($noi_dung['__ban_goc']) && is_array($noi_dung['__ban_goc']);
+$ban_goc      = $co_anh_chup ? $noi_dung['__ban_goc'] : $the_hien_tai;
+unset($noi_dung['__ban_goc']);
+// Đã duyệt nhưng không có ảnh chụp: thẻ đã mang giá trị mới nên không còn gì để so sánh
+$mat_ban_goc  = ($tt === 'da_duyet' && !$co_anh_chup);
+if ($mat_ban_goc) { $ban_goc = []; }
+$co_ban_goc = !empty($ban_goc); // false nếu không lấy được thẻ gốc của công dân
+// Họ tên gốc lấy từ tài khoản nên luôn so sánh được, kể cả khi chưa lấy được thẻ
+if (!$mat_ban_goc && !isset($ban_goc['ho_ten'])) { $ban_goc['ho_ten'] = $yeu_cau['ho_ten'] ?? ''; }
+
+$thay_doi = []; $khong_doi = []; $khac = [];
+if ($la_dieu_chinh) {
+    $truongSoSanh = ['ho_ten', 'ngay_sinh', 'gioi_tinh', 'quoc_tich', 'dan_toc', 'ton_giao',
+                     'dac_diem_nhan_dang', 'que_quan', 'tinh_thanh', 'noi_thuong_tru'];
+    $chuanSS = function ($k, $v) {
+        $v = trim((string)$v);
+        if ($k === 'ngay_sinh' && $v !== '' && ($ts = strtotime($v)) !== false) return date('Y-m-d', $ts);
+        return $v;
+    };
+    foreach ($truongSoSanh as $k) {
+        $moi = $chuanHoa($noi_dung[$k . '_moi'] ?? $noi_dung[$k] ?? '');
+        if ($moi === '') continue; // công dân không gửi trường này
+        $cu  = $chuanHoa($ban_goc[$k] ?? '');
+        $hang = [$nhanTruong[$k] ?? $k, $dinhDangNgay($cu), $dinhDangNgay($moi)];
+        if ($chuanSS($k, $moi) !== $chuanSS($k, $cu)) { $thay_doi[] = $hang; } else { $khong_doi[] = $hang; }
+    }
+    foreach ($noi_dung as $k => $gt) {
+        if (in_array($k, $truongSoSanh, true) || in_array($k, ['ly_do', 'csrf_token', 'ma_csrf'], true)) continue;
+        if (substr($k, -4) === '_cu' || substr($k, -4) === '_moi') continue;
+        $khac[] = [$nhanTruong[$k] ?? ucfirst(str_replace('_', ' ', $k)), $chuanHoa($gt)];
+    }
+}
+
+// Gom dữ liệu: cặp *_cu / *_moi thì so sánh, trường lẻ thì hiện ở cột "Đề nghị"
+$ly_do = '';
+$dong  = [];
+foreach ($noi_dung as $khoa => $gia_tri) {
+    if (in_array($khoa, ['csrf_token', 'ma_csrf'], true)) continue;
+    $v = $chuanHoa($gia_tri);
+    if ($khoa === 'ly_do') { $ly_do = $v; continue; }
+
+    if (substr($khoa, -4) === '_cu') {
+        $goc = substr($khoa, 0, -4);
+        if (array_key_exists($goc . '_moi', $noi_dung)) continue; // sẽ xử lý ở dòng *_moi
+    }
+    if (substr($khoa, -4) === '_moi') {
+        $goc = substr($khoa, 0, -4);
+        $cu  = $chuanHoa($noi_dung[$goc . '_cu'] ?? '');
+        $dong[] = [$nhanTruong[$goc] ?? ucfirst(str_replace('_', ' ', $goc)), $dinhDangNgay($cu), $dinhDangNgay($v)];
+        continue;
+    }
+    $dong[] = [$nhanTruong[$khoa] ?? ucfirst(str_replace('_', ' ', $khoa)), '', $dinhDangNgay($v)];
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết yêu cầu điều chỉnh</title>
-    <link rel="stylesheet" href="/css/vneid-theme.css">
-    <link rel="stylesheet" href="/css/professional-form.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chi tiết yêu cầu - VNeID</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/public/css/trang-chu.css">
+    <link rel="stylesheet" href="/public/css/chi-tiet.css">
+    <link rel="stylesheet" href="/public/css/can-cuoc-danh-sach.css">
     <style>
-        body{margin:0;min-height:100vh;background:#E9EAE8;font-family:'Times New Roman',Times,serif;color:#222}
-        .detail-shell{max-width:980px;margin:28px auto;background:#fff;border:1px solid #d2d4d2;border-top:5px solid #b91c1c;border-radius:14px;box-shadow:0 14px 34px rgba(36,40,38,.12);overflow:hidden}
-        .detail-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 28px;border-bottom:1px solid #e2e5e2}
-        .detail-title{border-left:5px solid #b91c1c;padding-left:14px}.detail-title h1{margin:0;color:#b91c1c;font-size:28px}.detail-title p{margin:6px 0 0;color:#64748b}
-        .back-link{text-decoration:none;color:#334155;border:1px solid #cbd5e1;border-radius:8px;padding:10px 14px;font-weight:700;white-space:nowrap}
-        .detail-content{padding:24px 28px 28px}.notice{padding:12px 14px;margin-bottom:18px;border-radius:8px;border:1px solid #bbf7d0;background:#dcfce7;color:#166534;font-weight:700}
-        .request-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.meta-card{border:1px solid #e2e5e2;border-radius:10px;background:#fafafa;padding:14px}.meta-card span{display:block;color:#64748b;font-size:13px}.meta-card strong{display:block;margin-top:5px;color:#222;font-size:15px}
-        .compare-table{border:1px solid #dfe3e7;border-radius:10px;overflow:hidden}.compare-row{display:grid;grid-template-columns:180px 1fr 1fr;border-bottom:1px solid #edf0f3}.compare-row:last-child{border-bottom:none}.compare-row.header{background:#f4f5f4;font-weight:800;color:#475569}.compare-row>div{padding:13px 14px}.compare-row>div:not(:last-child){border-right:1px solid #edf0f3}.old-value{color:#64748b}.new-value{font-weight:800;color:#991b1b}
-        .reason-box{margin-top:18px;border:1px solid #e2e5e2;border-radius:10px;padding:16px;background:#fffafa}.reason-box span{display:block;color:#64748b;font-size:13px}.reason-box strong{display:block;margin-top:6px;line-height:1.45}
-        .result-box{margin-top:18px;border-left:4px solid #b91c1c;background:#f8faf8;padding:14px 16px;border-radius:8px}.result-box strong{display:block;margin-bottom:5px}
-        .action-form{margin-top:18px;border-top:1px solid #e2e5e2;padding-top:18px}.action-form label{display:block;font-weight:800;margin-bottom:8px}.action-form textarea{width:100%;min-height:90px;border:1px solid #cbd5e1;border-radius:8px;padding:12px;box-sizing:border-box;font-family:'Times New Roman',Times,serif;font-size:15px}.action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.action-buttons button{border:none;border-radius:8px;padding:12px;font-family:'Times New Roman',Times,serif;font-size:15px;font-weight:800;cursor:pointer}.approve{background:#b91c1c;color:#fff}.reject{background:#fff;color:#334155;border:1px solid #cbd5e1!important}
-        @media(max-width:760px){body{background:#fff}.detail-shell{margin:0;border:0;border-radius:0;min-height:100vh}.detail-header{align-items:flex-start;padding:18px 16px}.detail-title h1{font-size:24px}.detail-content{padding:18px 16px}.request-meta{grid-template-columns:1fr}.compare-table{overflow-x:auto}.compare-row{min-width:680px}.action-buttons{grid-template-columns:1fr}}
+    .yc-back{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1.5px solid #e4e0e0;border-radius:10px;background:#fff;color:#3a2f2f;text-decoration:none;font-size:14px;font-weight:600;transition:all .15s}
+    .yc-back:hover{border-color:#8e2a30;color:#8e2a30}
+    .yc-alert{display:flex;gap:10px;align-items:center;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:14px;font-weight:600}
+    .yc-alert.ok{background:#eefaf1;border:1px solid #bfe8ca;color:#1d6b35}
+    .yc-alert.err{background:#fdeeee;border:1px solid #f3c6c6;color:#9b1c1c}
+    .yc-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .yc-meta .card{border:1px solid #eee6e6;border-radius:12px;background:#fcfafa;padding:14px 16px}
+    .yc-meta .card span{display:block;font-size:12px;color:#8a7f7f;text-transform:uppercase;letter-spacing:.3px}
+    .yc-meta .card strong{display:block;margin-top:6px;font-size:15px;color:#2b2222;word-break:break-word}
+    .yc-table{border:1px solid #eee6e6;border-radius:12px;overflow:hidden}
+    .yc-row{display:grid;grid-template-columns:200px 1fr 1fr;border-bottom:1px solid #f1eaea}
+    .yc-row:last-child{border-bottom:0}
+    .yc-row>div{padding:13px 16px;font-size:14px;word-break:break-word}
+    .yc-row.head{background:#8e2a30;color:#fff;font-weight:700;font-size:13px;text-transform:uppercase}
+    .yc-row .lbl{font-weight:600;color:#3a2f2f}
+    .yc-row .old{color:#8a7f7f}
+    .yc-row .new{font-weight:700;color:#8e2a30}
+    .yc-box{margin-top:18px;border:1px solid #eee6e6;border-radius:12px;padding:16px;background:#fffafa}
+    .yc-box span{display:block;font-size:12px;color:#8a7f7f;text-transform:uppercase}
+    .yc-box strong{display:block;margin-top:6px;line-height:1.5;font-weight:600}
+    .yc-form{margin-top:22px;padding-top:20px;border-top:1px solid #eee6e6}
+    .yc-form label{display:block;font-weight:700;margin-bottom:8px;font-size:14px}
+    .yc-form textarea{width:100%;min-height:96px;box-sizing:border-box;padding:12px 14px;border:1.5px solid #e4e0e0;border-radius:12px;font:inherit;font-size:14px;resize:vertical;outline:none}
+    .yc-form textarea:focus{border-color:#8e2a30;box-shadow:0 0 0 4px rgba(142,42,48,.12)}
+    .yc-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+    .yc-actions button{height:46px;border-radius:12px;border:1.5px solid transparent;font:inherit;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+    .yc-actions .approve{background:#8e2a30;color:#fff}.yc-actions .approve:hover{background:#74202a}
+    .yc-actions a.approve{height:46px;border-radius:12px;font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#8e2a30;color:#fff;text-decoration:none;transition:background .15s}
+    .yc-actions a.approve:hover{background:#74202a}
+    .yc-actions .supp{background:#fff7e8;color:#8a5a00;border-color:#f0d9a8}.yc-actions .supp:hover{background:#ffefd0}
+    .yc-actions .reject{background:#fff;color:#3a2f2f;border-color:#d9d2d2}.yc-actions .reject:hover{border-color:#8e2a30;color:#8e2a30}
+    .yc-diff-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px}
+    .yc-diff-head h3{margin:0;font-size:16px;color:#2b2222;display:flex;align-items:center;gap:8px}
+    .yc-diff-head h3 i{color:#8e2a30}
+    .yc-pill{padding:5px 12px;border-radius:999px;background:#f1eeee;color:#756a6a;font-size:13px;font-weight:700}
+    .yc-pill.has{background:#fdeeee;color:#8e2a30}
+    .yc-row.changed{background:#fffaf0}
+    .yc-row.changed .old s{color:#9a8f8f;text-decoration-thickness:1.5px}
+    .yc-row.changed .new i{font-size:11px;margin-right:4px}
+    .yc-same{margin-top:14px}
+    .yc-same summary{cursor:pointer;font-size:14px;font-weight:600;color:#756a6a;padding:8px 2px;user-select:none}
+    .yc-same summary:hover{color:#8e2a30}
+    .yc-same .yc-table{margin-top:8px}
+    @media(max-width:760px){.yc-meta{grid-template-columns:1fr 1fr}
+        .yc-actions{grid-template-columns:1fr}
+        .yc-table{overflow-x:auto}.yc-row{min-width:640px}
+    }
     </style>
 </head>
 <body>
-    <?php xuatThanhChuyenVaiTroDemo(); ?>
-    <?php
-        $lay = function($key, $macDinh = '') use ($yeuCau) {
-            return trim((string)($yeuCau[$key] ?? $macDinh));
-        };
-        $trangThai = $lay('trang_thai', 'cho_tiep_nhan');
-        $nhanTrangThai = [
-            'cho_tiep_nhan' => 'Chờ tiếp nhận',
-            'cho_duyet' => 'Chờ duyệt',
-            'da_duyet' => 'Đã duyệt',
-            'hoan_thanh' => 'Hoàn thành',
-            'tu_choi' => 'Từ chối'
-        ];
-        $truocSau = [
-            'Họ và tên' => ['ho_ten_cu', 'ho_ten_moi'],
-            'Ngày sinh' => ['ngay_sinh_cu', 'ngay_sinh_moi'],
-            'Giới tính' => ['gioi_tinh_cu', 'gioi_tinh_moi'],
-            'Quốc tịch' => ['quoc_tich_cu', 'quoc_tich_moi'],
-            'Dân tộc' => ['dan_toc_cu', 'dan_toc_moi'],
-            'Tôn giáo' => ['ton_giao_cu', 'ton_giao_moi'],
-            'Quê quán' => ['que_quan_cu', 'que_quan_moi'],
-            'Nơi thường trú' => ['noi_thuong_tru_cu', 'noi_thuong_tru_moi']
-        ];
-    ?>
-    <main class="detail-shell">
-        <header class="detail-header">
-            <div class="detail-title"><h1>Chi tiết yêu cầu điều chỉnh</h1><p>Thông tin trước và sau khi đề nghị thay đổi</p></div>
-            <a class="back-link" href="/the_can_cuoc/danh_sach_yeu_cau_dieu_chinh">← Danh sách</a>
-        </header>
-        <div class="detail-content">
-            <?php if (!empty($thongBao)): ?><div class="notice"><?php echo e($thongBao); ?></div><?php endif; ?>
-            <section class="request-meta">
-                <div class="meta-card"><span>Mã hồ sơ</span><strong><?php echo e($lay('ma_ho_so', 'YC-'.$lay('ma_yeu_cau'))); ?></strong></div>
-                <div class="meta-card"><span>Số CCCD</span><strong><?php echo e($lay('so_cccd', '-')); ?></strong></div>
-                <div class="meta-card"><span>Trạng thái</span><strong><?php echo e($nhanTrangThai[$trangThai] ?? $trangThai); ?></strong></div>
-            </section>
-            <section class="compare-table">
-                <div class="compare-row header"><div>Thông tin</div><div>Thông tin hiện tại</div><div>Thông tin đề nghị</div></div>
-                <?php foreach ($truocSau as $ten => $keys):
-                    $cu = $lay($keys[0], 'Không có dữ liệu');
-                    $moi = $lay($keys[1], '');
-                    if ($ten === 'Ngày sinh') {
-                        if ($cu !== '' && $cu !== 'Không có dữ liệu') {
-                            $timestamp = strtotime($cu);
-                            if ($timestamp !== false) { $cu = date('d/m/Y', $timestamp); }
-                        }
-                        if ($moi !== '') {
-                            $timestamp = strtotime($moi);
-                            if ($timestamp !== false) { $moi = date('d/m/Y', $timestamp); }
-                        }
-                    }
-                    if ($moi === '') { $moi = $cu; }
-                ?>
-                    <div class="compare-row"><div><strong><?php echo e($ten); ?></strong></div><div class="old-value"><?php echo e($cu); ?></div><div class="new-value"><?php echo e($moi); ?></div></div>
-                <?php endforeach; ?>
-            </section>
-            <div class="reason-box"><span>Lý do công dân</span><strong><?php echo e($lay('ly_do', 'Không có lý do')); ?></strong></div>
-            <?php if (!in_array($trangThai, ['da_duyet','hoan_thanh','tu_choi'], true)): ?>
-                <form method="POST" class="action-form">
-                    <input type="hidden" name="ma_csrf" value="<?php echo e(taoMaCsrf()); ?>">
-                    <label for="ghi_chu">Lý do duyệt hoặc từ chối</label>
-                    <textarea id="ghi_chu" name="ghi_chu" placeholder="Nhập ghi chú xử lý"></textarea>
-                    <div class="action-buttons">
-                        <button class="approve" name="ket_qua" value="duyet">Duyệt yêu cầu</button>
-                        <button class="reject" name="ket_qua" value="tu_choi">Từ chối</button>
-                    </div>
-                </form>
-            <?php else: ?>
-                <div class="result-box">
-                    <strong>Kết quả: <?php echo e($nhanTrangThai[$trangThai] ?? $trangThai); ?></strong>
-                    <span>Ghi chú: <?php echo e($lay('ghi_chu', 'Không có ghi chú')); ?></span>
+    <?php require __DIR__ . '/../nguoi_dung/thanh_menu.php'; ?>
+
+    <div class="app-shell">
+        <main class="main">
+            <div class="page-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+                <div>
+                    <h1 class="page-title">Chi tiết yêu cầu</h1>
+                    <p class="page-sub"><?= e($yeu_cau['ten_dich_vu'] ?? '') ?></p>
                 </div>
-            <?php endif; ?>
-        </div>
-    </main>
+                <a class="yc-back" href="/the_can_cuoc/danh_sach_yeu_cau"><i class="fa-solid fa-arrow-left"></i> Danh sách</a>
+            </div>
+
+            <section class="panel" style="padding:22px">
+                <?php if ($thong_bao !== ''): ?>
+                    <div class="yc-alert ok"><i class="fa-solid fa-circle-check"></i><?= e($thong_bao) ?></div>
+                <?php endif; ?>
+                <?php if ($loi !== ''): ?>
+                    <div class="yc-alert err"><i class="fa-solid fa-circle-exclamation"></i><?= e($loi) ?></div>
+                <?php endif; ?>
+
+                <div class="yc-meta">
+                    <div class="card"><span>Mã hồ sơ</span><strong>#<?= (int)($yeu_cau['ma_ho_so'] ?? 0) ?></strong></div>
+                    <div class="card"><span>Công dân</span><strong><?= e($yeu_cau['ho_ten'] ?? '--') ?></strong></div>
+                    <div class="card"><span>Số định danh</span><strong><?= e($yeu_cau['so_dinh_danh'] ?? '--') ?></strong></div>
+                    <div class="card"><span>Trạng thái</span>
+                        <strong><span class="badge <?= e($lop_tt) ?>"><?= e($nhan_tt) ?></span></strong>
+                    </div>
+                </div>
+
+                <div class="yc-meta" style="grid-template-columns:1fr;margin-top:-6px">
+                    <div class="card"><span>Ngày gửi</span>
+                        <strong><?= !empty($yeu_cau['ngay_nop']) ? date('d/m/Y H:i', strtotime($yeu_cau['ngay_nop'])) : '--' ?></strong>
+                    </div>
+                </div>
+
+                <?php if ($la_dieu_chinh): ?>
+                    <?php if ($mat_ban_goc): ?>
+                        <div class="yc-alert err"><i class="fa-solid fa-circle-info"></i>Yêu cầu này đã được cập nhật trước đó nên không còn bản gốc để đối chiếu. Bảng dưới chỉ hiển thị nội dung đề nghị.</div>
+                    <?php elseif (!$co_ban_goc): ?>
+                        <div class="yc-alert err"><i class="fa-solid fa-circle-exclamation"></i>Chưa lấy được thẻ căn cước của công dân nên chỉ đối chiếu được họ tên theo tài khoản.</div>
+                    <?php endif; ?>
+
+                    <div class="yc-diff-head">
+                        <h3><i class="fa-solid fa-code-compare"></i> Thông tin thay đổi so với bản gốc</h3>
+                        <span class="yc-pill <?= $thay_doi ? 'has' : '' ?>"><?= count($thay_doi) ?> thay đổi</span>
+                    </div>
+
+                    <div class="yc-table">
+                        <div class="yc-row head"><div>Thông tin</div><div>Bản gốc</div><div>Đề nghị thay đổi</div></div>
+                        <?php if ($thay_doi): foreach ($thay_doi as [$ten, $cu, $moi]): ?>
+                            <div class="yc-row changed">
+                                <div class="lbl"><?= e($ten) ?></div>
+                                <div class="old"><?= $cu !== '' ? '<s>' . e($cu) . '</s>' : '—' ?></div>
+                                <div class="new"><i class="fa-solid fa-arrow-right"></i> <?= e($moi) ?></div>
+                            </div>
+                        <?php endforeach; else: ?>
+                            <div class="yc-row"><div class="lbl" style="grid-column:1/-1;text-align:center;color:#8a7f7f">Không có thông tin nào khác so với bản gốc.</div></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if ($khong_doi): ?>
+                        <details class="yc-same">
+                            <summary>Xem <?= count($khong_doi) ?> thông tin không thay đổi</summary>
+                            <div class="yc-table">
+                                <?php foreach ($khong_doi as [$ten, $cu, $moi]): ?>
+                                    <div class="yc-row">
+                                        <div class="lbl"><?= e($ten) ?></div>
+                                        <div class="old" style="grid-column:2/4"><?= e($moi) ?></div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </details>
+                    <?php endif; ?>
+
+                    <?php if ($khac): ?>
+                        <div class="yc-table" style="margin-top:14px">
+                            <?php foreach ($khac as [$ten, $gt]): ?>
+                                <div class="yc-row"><div class="lbl"><?= e($ten) ?></div><div style="grid-column:2/4"><?= e($gt) ?></div></div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                <div class="yc-table">
+                    <div class="yc-row head"><div>Thông tin</div><div>Hiện tại</div><div>Đề nghị</div></div>
+                    <?php if ($dong): foreach ($dong as [$ten, $cu, $moi]): ?>
+                        <div class="yc-row">
+                            <div class="lbl"><?= e($ten) ?></div>
+                            <div class="old"><?= $cu !== '' ? e($cu) : '—' ?></div>
+                            <div class="new"><?= $moi !== '' ? e($moi) : '—' ?></div>
+                        </div>
+                    <?php endforeach; else: ?>
+                        <div class="yc-row"><div class="lbl" style="grid-column:1/-1">Yêu cầu không có nội dung chi tiết.</div></div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($ly_do !== ''): ?>
+                    <div class="yc-box"><span>Lý do của công dân</span><strong><?= e($ly_do) ?></strong></div>
+                <?php endif; ?>
+
+                <?php if (!$da_xu_ly): ?>
+                    <form method="post" class="yc-form">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrf_token ?? '') ?>">
+                        <label for="ghi_chu">Ghi chú xử lý</label>
+                        <textarea id="ghi_chu" name="ghi_chu" placeholder="Nhập lý do duyệt, từ chối hoặc nội dung cần bổ sung..."></textarea>
+                        <div class="yc-actions">
+                            <?php if ($la_dieu_chinh): ?>
+                                <?php $ma_the_cap_nhat = (int)($the_hien_tai['ma_the'] ?? 0); ?>
+                                <?php if ($ma_the_cap_nhat > 0): ?>
+                                    <a class="approve"
+                                       href="/the_can_cuoc/cap_nhat?id=<?= $ma_the_cap_nhat ?>&yeu_cau=<?= (int)($yeu_cau['ma_ho_so'] ?? 0) ?>">
+                                        <i class="fa-solid fa-pen-to-square"></i> Cập nhật thông tin
+                                    </a>
+                                <?php else: ?>
+                                    <button type="button" class="approve" disabled
+                                            style="opacity:.5;cursor:not-allowed"
+                                            title="Không tìm thấy thẻ căn cước của công dân này">
+                                        <i class="fa-solid fa-pen-to-square"></i> Cập nhật thông tin
+                                    </button>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <button class="approve" name="ket_qua" value="duyet"
+                                        onclick="return confirm('Duyệt yêu cầu cấp đổi thẻ căn cước này?');">
+                                    <i class="fa-solid fa-check"></i> Duyệt yêu cầu
+                                </button>
+                            <?php endif; ?>
+                            <button class="supp" name="ket_qua" value="bo_sung"><i class="fa-solid fa-file-circle-plus"></i> Yêu cầu bổ sung</button>
+                            <button class="reject" name="ket_qua" value="tu_choi"><i class="fa-solid fa-xmark"></i> Từ chối</button>
+                        </div>
+                    </form>
+                <?php else: ?>
+                    <div class="yc-box">
+                        <span>Kết quả xử lý</span>
+                        <strong><?= e($nhan_tt) ?></strong>
+                        <strong style="color:#756a6a;font-weight:500">Ghi chú: <?= e(trim((string)($yeu_cau['ghi_chu'] ?? '')) ?: 'Không có ghi chú') ?></strong>
+                    </div>
+                <?php endif; ?>
+            </section>
+        </main>
+    </div>
 </body>
 </html>

@@ -31,6 +31,6 @@ function view(string $ten, array $data = [], bool $khung = true): void {
     extract($data);
     ob_start();
     require ROOT . "/app/views/can_bo/$ten.php";
-    $noiDung = ob_get_clean();
-    if ($khung) require ROOT . '/app/views/can_bo/layout/khung.php'; else echo $noiDung;
+    $noi_dung_trang = ob_get_clean();
+    if ($khung) require ROOT . '/app/views/giay_to_vi/khung.php'; else echo $noi_dung_trang;
 }

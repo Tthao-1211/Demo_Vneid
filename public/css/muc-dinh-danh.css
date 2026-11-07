@@ -1,0 +1,62 @@
+.khoi-hep { max-width: 640px; margin: 0 auto; width: 100%; }
+.khoi h2 small { font-size: 14px; font-weight: 400; color: #6b7280; }
+.ghi-chu { color: #6b7280; font-size: 14px; }
+.hop-thong-tin { margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; background: #eef6ff; color: #1e3a8a; font-size: 14px; }
+.hop-loi { margin: 0 0 16px; padding: 12px 16px; border-radius: 10px; background: #fdecec; color: #b42318; font-size: 14px; }
+
+.form-ho-so label { display: block; margin: 16px 0 6px; font-size: 14px; color: #4b5563; }
+.form-ho-so input[type=text], .form-ho-so textarea, .hang-loc select {
+  width: 100%; padding: 12px 14px; font: inherit; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa;
+}
+.form-ho-so input:focus, .form-ho-so textarea:focus { outline: 0; border-color: #d71f18; background: #fff; }
+.form-ho-so input[type=file] { width: 100%; padding: 10px; border: 1px dashed #d1d5db; border-radius: 10px; }
+
+.nut-do, .nut-vien { display: inline-block; padding: 12px 22px; border: 0; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer; }
+.nut-do { background: linear-gradient(180deg, #e8261c, #cd1710); color: #fff; }
+.nut-vien { background: #fff; color: #b8100f; border: 1.5px solid #b8100f; }
+.nut-nho { padding: 8px 16px; font-size: 14px; }
+.form-ho-so > .nut-do { width: 100%; margin-top: 22px; }
+.hang-nut { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+.hang-loc { margin-bottom: 14px; max-width: 260px; }
+.bang-cuon { overflow-x: auto; }
+.bang { width: 100%; border-collapse: collapse; font-size: 14px; }
+.bang th, .bang td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f0e6e0; }
+.bang th { background: #fdf6f3; font-weight: 600; }
+.bang .trong { text-align: center; color: #9ca3af; padding: 24px; }
+
+.nhan { 
+  display: inline-block;
+  white-space: nowrap; 
+  padding: 5px 12px; 
+  border-radius: 999px; 
+  font-size: 12.5px; 
+  font-weight: 600; 
+  text-align: center;
+}
+.nhan-da_nop      { background: #e0ecff; color: #1d4ed8; }
+.nhan-dang_xu_ly  { background: #fff3cd; color: #92600a; }
+.nhan-can_bo_sung { background: #ffe4cc; color: #b45309; }
+.nhan-da_duyet    { background: #dcfce7; color: #166534; }
+.nhan-tu_choi     { background: #fde2e2; color: #b42318; }
+
+.thong-tin { display: grid; grid-template-columns: 220px 1fr; gap: 10px 16px; margin: 0 0 20px; }
+.thong-tin dt { color: #6b7280; font-size: 14px; }
+.thong-tin dd { margin: 0; font-weight: 500; }
+.hang-anh { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.hang-anh figure { margin: 0; text-align: center; }
+.hang-anh img { max-width: 100%; max-height: 320px; border-radius: 12px; border: 1px solid #e5e7eb; }
+.hang-anh figcaption { margin-top: 6px; font-size: 13px; color: #6b7280; }
+
+@media (max-width: 640px) {
+  .thong-tin { grid-template-columns: 1fr; gap: 2px; }
+  .hang-anh { grid-template-columns: 1fr; }
+}
+
+.bang td:nth-child(6) {
+  white-space: nowrap;
+  text-align: center;
+}
+.bang th:nth-child(6) {
+  text-align: center;
+}

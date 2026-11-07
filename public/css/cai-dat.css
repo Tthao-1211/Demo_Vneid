@@ -1,0 +1,19 @@
+.banner-cai-dat { padding: 28px 0; background: linear-gradient(135deg, #f3ece8, #fbf6f2); border-bottom: 1px solid #eadfd9; }
+.banner-cai-dat .chua { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.banner-cai-dat h1 { margin: 0 0 6px; font-size: 28px; font-weight: 800; }
+.banner-cai-dat p { margin: 0; max-width: 520px; color: #6b7280; font-size: 15px; }
+
+.nhom-cai-dat { padding: 8px 22px; }
+.nhom-cai-dat h2 { margin: 12px 0 4px; font-size: 14px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .5px; }
+.dong-cai-dat { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; font-size: 16px; border-bottom: 1px solid #f0e6e0; }
+.nhom-cai-dat .dong-cai-dat:last-child { border-bottom: 0; }
+a.dong-cai-dat:hover { color: #b8100f; }
+.dong-cai-dat .mui-ten { width: 20px; height: 20px; color: #9ca3af; }
+.dong-cai-dat b { font-weight: 500; color: #6b7280; }
+.dong-cai-dat b.gia-tri-do { color: #d71f18; font-weight: 600; }
+
+.nut-dang-xuat { display: block; padding: 16px; text-align: center; font-size: 17px; font-weight: 600; color: #d71f18; background: #fdecec; border-radius: 14px; }
+.nut-dang-xuat:hover { background: #fbd9d9; }
+
+.form-ho-so input[type=password] { width: 100%; padding: 12px 14px; font: inherit; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa; }
+.form-ho-so input[type=password]:focus { outline: 0; border-color: #d71f18; background: #fff; }

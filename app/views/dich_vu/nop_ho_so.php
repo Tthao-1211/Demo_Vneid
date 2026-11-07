@@ -34,7 +34,7 @@
     <div class="vneid-header p-3 mb-3 shadow-sm">
         <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <a href="/Mo_phong_app_vneid/dich_vu/danh_sach" class="text-white fs-4 me-3 text-decoration-none">
+                <a href="/dich_vu/danh_sach" class="text-white fs-4 me-3 text-decoration-none">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <h5 class="fw-bold mb-0">Nộp hồ sơ Dịch vụ công</h5>

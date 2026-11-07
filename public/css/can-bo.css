@@ -173,3 +173,51 @@ main { flex: 1; padding: 24px; }
 .o-mat-khau button { position: absolute; right: 8px; top: 6px; background: none; border: 0; cursor: pointer; font-size: 16px; }
 .goi-y { background: #f9fafb; padding: 10px; border-radius: var(--bo); font-size: 12px; color: var(--chu-mo); }
 .chu-thich { margin: 0; padding: 12px; border-top: 1px solid var(--vien); text-align: center; font-size: 11px; color: var(--chu-mo); }
+
+@media (min-width: 992px) {
+  .cot-co-dinh ~ .khung-ung-dung { padding-left: 280px; max-width: none; }
+}
+.khung-ung-dung .noi-dung-trang { padding: 24px; }
+
+/* ===== Trang quản lý loại giấy tờ: lưới thẻ đều nhau ===== */
+.luoi-3 {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  align-items: stretch;
+  gap: 20px;
+}
+.luoi-3 > .khoi {
+  width: auto; min-width: 0; max-width: none;
+  margin: 0; justify-self: stretch;          /* bỏ margin:auto làm thẻ co lại */
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 20px;
+  border-radius: 12px;
+  transition: box-shadow .15s, transform .15s;
+}
+.luoi-3 > .khoi:hover {
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, .2);
+  transform: translateY(-2px);
+}
+.luoi-3 .ten-loai { margin: 0; font-size: 17px; line-height: 1.3; }
+.luoi-3 small.mo  { font-size: 12px; }
+
+/* Các trường: thẻ nhỏ, mã trường nhỏ và nhạt */
+.luoi-3 .the-truong { margin: 0; gap: 8px; }
+.luoi-3 .the-truong span {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  background: #f3f4f6; border: 1px solid var(--vien);
+  padding: 4px 10px; border-radius: 999px; font-size: 13px;
+}
+.luoi-3 .the-truong code { font-size: 11px; color: var(--chu-mo); }
+
+/* Hàng nút: sát đáy thẻ, hai nút cao bằng nhau */
+.luoi-3 .hang-nut { margin-top: auto; padding-top: 8px; align-items: center; }
+.luoi-3 .hang-nut form { margin: 0; display: flex; }
+.luoi-3 .hang-nut .nut { height: 32px; padding: 0 14px; font-size: 13px; }
+.luoi-3 .hang-nut .nut-vien { border-color: var(--vien); color: var(--chu); background: #fff; }
+.luoi-3 .hang-nut .nut-vien:hover { border-color: var(--do); color: var(--do); background: var(--do-nhat); }
+.luoi-3 .hang-nut .nut-vien-do { border-color: #f3b4be; color: var(--do); }
+.luoi-3 .hang-nut .nut-vien-do:hover { background: var(--do); border-color: var(--do); color: #fff; }
+
+/* Tiêu đề trang */
+.dau-trang { padding-bottom: 14px; margin-bottom: 20px; }
+.dau-trang h1 { font-size: 22px; }

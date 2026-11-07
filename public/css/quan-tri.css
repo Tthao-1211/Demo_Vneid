@@ -1,0 +1,70 @@
+.thanh-loc { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr auto auto; gap: 10px; margin-bottom: 18px; }
+.thanh-loc select, .thanh-loc input {
+width: 100%; padding: 11px 14px; font: inherit; font-size: 14px;
+border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa;
+}
+.thanh-loc select:focus, .thanh-loc input:focus { outline: 0; border-color: #d71f18; background: #fff; }
+.thanh-loc .nut-do, .thanh-loc .nut-vien { padding: 11px 20px; text-align: center; }
+.khoi h2 small { font-size: 14px; font-weight: 400; color: #6b7280; }
+.bang td small { color: #9ca3af; }
+.nhan-xanh { background: #dcfce7; color: #166534; }
+.nhan-do   { background: #fde2e2; color: #b42318; }
+.nhan-xam  { background: #e5e7eb; color: #374151; }
+.phan-trang { display: flex; gap: 6px; margin-top: 18px; flex-wrap: wrap; }
+.phan-trang a { padding: 7px 13px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; }
+.phan-trang a.dang-chon { background: #d71f18; border-color: #d71f18; color: #fff; }
+@media (max-width: 900px) { .thanh-loc { grid-template-columns: 1fr 1fr; } }
+
+.luoi-so { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.thanh-do { height: 8px; min-width: 80px; background: #fdecec; border-radius: 99px; }
+.thanh-do i { display: block; height: 100%; background: #d71f18; border-radius: 99px; }
+.hai-cot { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .hai-cot { grid-template-columns: 1fr; } }
+
+main.than-trang-quan-tri {
+  margin-left: 260px;
+  padding: 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  main.than-trang-quan-tri { margin-left: 0; padding: 16px; }
+}
+
+@media print {
+  .thanh-menu, .cot-chuc-nang, .thanh-chuc-nang-in, .nut-chuc-nang { display: none !important; }
+  main.than-trang-quan-tri { margin-left: 0 !important; padding: 0 !important; }
+  .khoi { break-inside: avoid; border: 1px solid #ccc !important; box-shadow: none !important; }
+}
+
+.the-dem-so {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.bieu-do-khung {
+  position: relative;
+  max-height: 280px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  form.khoi { grid-template-columns: 1fr !important; }
+  form.khoi > div { grid-column: span 1 !important; justify-content: flex-start !important; }
+}
+
+body.bg-light .chuan-noi-dung-quan-tri {
+      margin-left: 260px; 
+      padding: 20px 30px;
+    }
+
+    @media (max-width: 900px) {
+      body.bg-light .chuan-noi-dung-quan-tri {
+        margin-left: 0; 
+      }
+    }

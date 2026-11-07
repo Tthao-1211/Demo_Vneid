@@ -6,6 +6,7 @@
     <title>Dịch vụ công - VNeID</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/public/css/trang-chu.css">
     <style>
         :root { --vneid-red: #A31D1D; --vneid-dark: #7A0000; }
         body { background-color: #F4F6F8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -16,19 +17,9 @@
     </style>
 </head>
 <body class="pb-4">
+    <?php require __DIR__ . '/../nguoi_dung/thanh_menu.php'; ?>
 
-    <!-- Header VNeID Dịch vụ công - Có hiện tên công dân -->
-    <div class="vneid-header p-3 mb-4 shadow-sm">
-        <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
-            <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-text-fill me-2"></i>Dịch vụ công trực tuyến</h5>
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-person-circle fs-5"></i>
-                <span class="fw-semibold"><?= htmlspecialchars($_SESSION['ho_ten'] ?? 'Công dân') ?></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="container-fluid px-4">
+    <div class="container-fluid px-4 py-4">
         <!-- Danh mục Dịch vụ công -->
         <div class="card border-0 shadow-sm rounded-3 mb-4">
             <div class="card-header bg-white border-0 pt-3 pb-0">
@@ -45,7 +36,7 @@
                                         <i class="bi bi-shield-check me-1"></i>Định danh Mức <?= $dv['muc_toi_thieu'] ?>
                                     </span>
                                 </div>
-                                <a href="/Mo_phong_app_vneid/dich_vu/nop_ho_so?ma_dich_vu=<?= $dv['ma_dich_vu'] ?>" 
+                                <a href="/dich_vu/nop_ho_so?ma_dich_vu=<?= $dv['ma_dich_vu'] ?>" 
                                    class="btn btn-sm btn-danger rounded-pill px-3 fw-semibold" style="background-color: #A31D1D;">
                                     Nộp hồ sơ
                                 </a>

@@ -1,34 +1,61 @@
-<!-- app/views/the_can_cuoc/quan_ly_trang_thai.php -->
+<?php
+/** @var array $the_can_cuoc Biến chứa dữ liệu một bản ghi thẻ căn cước truyền từ Controller */
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Trạng thái Thẻ căn cước - VNeID</title>
-    <link rel="stylesheet" href="/css/vneid-theme.css">
-    <link rel="stylesheet" href="/css/professional-form.css">
+    <title>VNeID - Quản lý Trạng thái Thẻ căn cước</title>
+    <link rel="stylesheet" href="/public/css/trang-chu.css">
     <style>
         body {
-            background-color: #E9EAE8 !important; margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: 'Times New Roman', Times, serif;
+            background-color: #E9EAE8 !important;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+            color: #222222;
         }
-        .boca-brand { text-align: center; color: #ffffff; margin-top: 40px; margin-bottom: 25px; }
-        .boca-title { font-size: 20px; font-weight: 700; text-transform: uppercase; margin: 5px 0; }
-        .boca-sub { font-size: 13px; color: #ffca2c; margin: 0; }
 
-        .vneid-form-container { 
-            width: 100%; max-width: 680px; background-color: #ffffff; 
-            padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); 
-            box-sizing: border-box; margin-bottom: 50px; position: relative; 
+        .vneid-form-container {
+            width: 100%;
+            max-width: 680px;
+            background-color: #ffffff !important;
+            margin: 30px auto 50px auto;
+            padding: 35px 40px;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+            position: relative;
         }
-        .btn-back-arrow { 
-            position: absolute; left: 40px; top: 40px; font-size: 18px; color: #555; 
-            cursor: pointer; background: #f5f5f7; padding: 8px 14px; border-radius: 6px; 
-            border: none; text-decoration: none; 
+
+        .btn-back-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+            background: #f3f4f6;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: none;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: background 0.2s;
         }
-        .vneid-section-title { 
-            text-align: center; color: #222222; font-size: 22px; font-weight: 700; 
-            margin-top: 10px; margin-bottom: 25px; 
+        .btn-back-arrow:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .vneid-section-title {
+            text-align: center;
+            color: #1f2937 !important;
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            margin-top: 0;
+            margin-bottom: 30px;
         }
 
         .citizen-card-summary {
@@ -36,15 +63,15 @@
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 18px 22px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .citizen-name { font-size: 17px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 4px; }
         .citizen-cccd { font-size: 14px; color: #64748b; font-weight: 600; }
-        
-        .badge { padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: bold; }
+
+        .badge { padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 600; display: inline-block; }
         .badge-active { background-color: #e6f4ea; color: #137333; }
         .badge-expired { background-color: #fce8e6; color: #c5221f; }
         .badge-lost { background-color: #fef7e0; color: #b06000; }
@@ -96,76 +123,100 @@
 
         .form-group-custom { margin-bottom: 20px; }
         .form-group-custom label { display: block; font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
+        
         textarea {
-            width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px;
-            font-size: 14px; box-sizing: border-box; font-family: inherit; resize: vertical; min-height: 80px;
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            background: #fff;
+            color: #222;
         }
         textarea:focus { outline: none; border-color: #e3261f; box-shadow: 0 0 0 3px rgba(227, 38, 31, 0.15); }
 
         .btn-vneid-submit {
-            display: block; width: 100%; padding: 14px; background-color: #e3261f; color: #ffffff;
-            border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(227, 38, 31, 0.2); transition: background-color 0.2s;
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #e3261f;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(227, 38, 31, 0.2);
+            transition: background-color 0.2s;
         }
         .btn-vneid-submit:hover { background-color: #c91e17; }
 
         .alert-success {
-            padding: 12px 18px; background-color: #f0fdf4; color: #166534;
-            border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center;
+            padding: 12px 18px;
+            background-color: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
         }
     </style>
 </head>
 
+<?php require __DIR__ . '/../nguoi_dung/thanh_menu.php'; ?>
+
 <body>
-    <?php xuatThanhChuyenVaiTroDemo(); ?>
-    <div class="boca-brand">
-        <div class="boca-title">Bộ Công An</div>
-        <div class="boca-sub">Trung tâm dữ liệu Quốc gia về dân cư</div>
-    </div>
 
     <div class="vneid-form-container">
-        <a class="btn-back-arrow" href="/the_can_cuoc/chi_tiet?id=<?php echo $the_can_cuoc['id']; ?>">← Chi tiết</a>
+        <a class="btn-back-arrow" href="/the_can_cuoc/danh_sach">← Danh sách</a>
         <h2 class="vneid-section-title">Quản lý Trạng thái Thẻ căn cước</h2>
 
-        <?php if (!empty($thong_bao_thanh_cong)): ?>
-            <div class="alert-success">
-                ✅ <?php echo htmlspecialchars($thong_bao_thanh_cong); ?>
-            </div>
-        <?php endif; ?>
+        <?php if (!empty($thong_bao)): ?>
+    <div class="alert-success">✅ <?= htmlspecialchars($thong_bao) ?></div>
+<?php endif; ?>
+<?php if (!empty($loi)): ?>
+    <div class="alert-success" style="background:#fff6f6;color:#b91c1c;border-color:#fecaca;">⚠️ <?= htmlspecialchars($loi) ?></div>
+<?php endif; ?>
 
         <!-- Thông tin công dân đang xử lý -->
         <div class="citizen-card-summary">
             <div>
                 <div class="citizen-name"><?php echo htmlspecialchars($the_can_cuoc['ho_ten']); ?></div>
-                <div class="citizen-cccd">Số định danh: <span style="color: #e3261f;"><?php echo htmlspecialchars($the_can_cuoc['so_cccd']); ?></span></div>
+                <div class="citizen-cccd">Số định danh: <span style="color: #e3261f;"><?php echo htmlspecialchars($the_can_cuoc['so_the']); ?></span></div>
             </div>
             <div>
-                <?php if ($the_can_cuoc['trang_thai'] === 'con_hieu_luc'): ?>
-                    <span class="badge badge-active">Còn hiệu lực</span>
-                <?php elseif ($the_can_cuoc['trang_thai'] === 'het_han'): ?>
-                    <span class="badge badge-expired">Hết hạn</span>
-                <?php elseif ($the_can_cuoc['trang_thai'] === 'bao_mat'): ?>
-                    <span class="badge badge-lost">Báo mất</span>
-                <?php elseif ($the_can_cuoc['trang_thai'] === 'thu_hoi'): ?>
-                    <span class="badge badge-revoked">Thu hồi</span>
-                <?php endif; ?>
-            </div>
+    <?php
+    $nhanTrangThai = [
+        'con_hieu_luc' => ['Còn hiệu lực', 'badge-active'],
+        'het_han'      => ['Hết hạn',      'badge-expired'],
+        'bao_mat'      => ['Báo mất',      'badge-lost'],
+        'thu_hoi'      => ['Thu hồi',      'badge-revoked'],
+    ];
+    [$nhan, $lop] = $nhanTrangThai[$the_can_cuoc['trang_thai']] ?? [$the_can_cuoc['trang_thai'], 'badge-lost'];
+    ?>
+    <span class="badge <?= $lop ?>"><?= htmlspecialchars($nhan) ?></span>
+</div>
         </div>
 
         <?php if (!empty($lich_su_trang_thai)): ?>
-            <div style="margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-                <strong>Lịch sử thay đổi trạng thái thẻ</strong>
+            <div style="margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #fafafa;">
+                <strong style="font-size: 14px; color: #333;">Lịch sử thay đổi trạng thái thẻ</strong>
                 <?php foreach ($lich_su_trang_thai as $ls): ?>
                     <div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;">
-                        <span><?php echo date('d/m/Y H:i', strtotime($ls['ngay_thay_doi'])); ?></span>
-                        <span><?php echo htmlspecialchars(($ls['trang_thai_truoc'] ?? '-') . ' → ' . $ls['trang_thai_sau']); ?></span>
+                        <span style="color: #666;"><?php echo date('d/m/Y H:i', strtotime($ls['ngay_thay_doi'])); ?></span>
+                        <span style="font-weight: 600; color: #444;"><?php echo htmlspecialchars(($ls['trang_thai_truoc'] ?? '-') . ' → ' . $ls['trang_thai_sau']); ?></span>
                     </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="/the_can_cuoc/quan_ly_trang_thai?id=<?php echo $the_can_cuoc['id']; ?>">
-            <input type="hidden" name="ma_csrf" value="<?php echo e(taoMaCsrf()); ?>">
+        <form method="POST" action="/the_can_cuoc/quan_ly_trang_thai?id=<?php echo $the_can_cuoc['ma_the']; ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
             <label style="display: block; font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
                 Chọn trạng thái mới cần áp dụng cho thẻ:
             </label>

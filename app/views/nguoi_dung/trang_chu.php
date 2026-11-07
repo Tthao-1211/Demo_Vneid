@@ -82,7 +82,7 @@
         <h2>Tiện ích yêu thích</h2>
       </div>
       <div class="luoi luoi-3">
-        <a class="the-tien-ich" href="#"><i><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 14h4M6 16c.7-1.5 4.3-1.5 6 0"/></svg></i><span>Thẻ Căn cước/CCCD</span></a>
+        <a class="the-tien-ich" href="/the_can_cuoc/chi_tiet"><i><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 14h4M6 16c.7-1.5 4.3-1.5 6 0"/></svg></i><span>Thẻ Căn cước/CCCD</span></a>
         <a class="the-tien-ich" href="/giay_to_vi/danh_sach"><i><svg viewBox="0 0 24 24"><path d="M3 15l2-6h14l2 6v4H3zM7 19v2M17 19v2"/></svg></i><span>Ví điện tử</span></a>
         <a class="the-tien-ich" href="/dich_vu/danh_sach"><i><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v7M8.5 11.5h7"/></svg></i><span>Dịch vụ công</span></a>
       </div>

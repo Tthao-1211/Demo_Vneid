@@ -1,3 +1,49 @@
+<?php
+/**
+ * PHÂN TRANG
+ * - Nếu controller đã phân trang: truyền vào $trang_hien_tai, $tong_trang, $tong_ban_ghi (và $ds_ho_so chỉ chứa trang hiện tại).
+ * - Nếu controller chưa phân trang: view tự cắt mảng $ds_ho_so bằng array_slice (dùng được ngay).
+ */
+$so_dong = isset($so_dong) ? max(1, (int)$so_dong) : 10;
+
+if (!isset($tong_trang)) {
+    $tong_ban_ghi   = count($ds_ho_so);
+    $tong_trang     = max(1, (int)ceil($tong_ban_ghi / $so_dong));
+    $trang_hien_tai = min(max(1, (int)($_GET['trang'] ?? 1)), $tong_trang);
+    $ds_ho_so       = array_slice($ds_ho_so, ($trang_hien_tai - 1) * $so_dong, $so_dong);
+} else {
+    $tong_ban_ghi   = (int)($tong_ban_ghi ?? count($ds_ho_so));
+    $tong_trang     = max(1, (int)ceil($tong_ban_ghi / $so_dong)); // tính lại, không tin giá trị controller
+    $trang_hien_tai = min(max(1, (int)($trang_hien_tai ?? 1)), $tong_trang);
+}
+
+$tu_dong  = $tong_ban_ghi ? ($trang_hien_tai - 1) * $so_dong + 1 : 0;
+$den_dong = $tong_ban_ghi ? $tu_dong + count($ds_ho_so) - 1 : 0;
+
+// Tạo URL giữ nguyên bộ lọc khi chuyển trang
+$url_trang = function (int $p) use ($trang_thai, $tu_khoa, $tu_ngay, $den_ngay) {
+    $tham_so = array_filter([
+        'trang_thai' => $trang_thai,
+        'tu_khoa'    => $tu_khoa,
+        'tu_ngay'    => $tu_ngay,
+        'den_ngay'   => $den_ngay,
+        'trang'      => $p > 1 ? $p : null,
+    ], fn($v) => $v !== null && $v !== '');
+    $qs = http_build_query($tham_so);
+    return '/nguoi_dung/trang_chu_can_bo' . ($qs ? '?' . $qs : '');
+};
+
+// Danh sách số trang hiển thị (có dấu ...)
+$cac_trang = [];
+$cua_so = 2;
+for ($i = 1; $i <= $tong_trang; $i++) {
+    if ($i === 1 || $i === $tong_trang || abs($i - $trang_hien_tai) <= $cua_so) {
+        $cac_trang[] = $i;
+    } elseif (end($cac_trang) !== '...') {
+        $cac_trang[] = '...';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,6 +54,21 @@
   <link rel="stylesheet" href="/public/css/trang-chu.css">
   <link rel="stylesheet" href="/public/css/muc-dinh-danh.css">
   <link rel="stylesheet" href="/public/css/quan-tri.css">
+  <style>
+    .phan-trang-chua { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+    .phan-trang-thongtin { font-size: .875rem; color: #6b7280; }
+    .phan-trang { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+    .phan-trang a, .phan-trang span {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 36px; height: 36px; padding: 0 10px; border-radius: 8px;
+      border: 1px solid #e5e7eb; background: #fff; color: #374151;
+      font-size: .875rem; text-decoration: none; transition: .15s;
+    }
+    .phan-trang a:hover { border-color: #d71f18; color: #d71f18; }
+    .phan-trang .dang-chon { background: #d71f18; border-color: #d71f18; color: #fff; font-weight: 600; }
+    .phan-trang .vo-hieu { opacity: .45; cursor: not-allowed; }
+    .phan-trang .dau-ba-cham { border: 0; background: transparent; min-width: 20px; padding: 0; }
+  </style>
 </head>
 <body>
   <?php require __DIR__ . '/thanh_menu.php'; ?>
@@ -59,11 +120,53 @@
               </tr>
             <?php endforeach; ?>
             <?php if (!$ds_ho_so): ?>
-              <tr><td colspan="8" class="trong">Không có hồ sơ phù hợp.</td></tr>
+              <tr><td colspan="7" class="trong">Không có hồ sơ phù hợp.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>
       </div>
+
+      <?php if ($tong_ban_ghi > 0): ?>
+        <div class="phan-trang-chua">
+          <div class="phan-trang-thongtin">
+            Hiển thị <?= $tu_dong ?>–<?= $den_dong ?> / <?= $tong_ban_ghi ?> hồ sơ
+          </div>
+
+          <?php if (true): ?>
+            <nav aria-label="Phân trang">
+              <ul class="phan-trang">
+                <li>
+                  <?php if ($trang_hien_tai > 1): ?>
+                    <a href="<?= e($url_trang($trang_hien_tai - 1)) ?>" aria-label="Trang trước">&laquo;</a>
+                  <?php else: ?>
+                    <span class="vo-hieu">&laquo;</span>
+                  <?php endif; ?>
+                </li>
+
+                <?php foreach ($cac_trang as $p): ?>
+                  <li>
+                    <?php if ($p === '...'): ?>
+                      <span class="dau-ba-cham">…</span>
+                    <?php elseif ($p === $trang_hien_tai): ?>
+                      <span class="dang-chon" aria-current="page"><?= $p ?></span>
+                    <?php else: ?>
+                      <a href="<?= e($url_trang($p)) ?>"><?= $p ?></a>
+                    <?php endif; ?>
+                  </li>
+                <?php endforeach; ?>
+
+                <li>
+                  <?php if ($trang_hien_tai < $tong_trang): ?>
+                    <a href="<?= e($url_trang($trang_hien_tai + 1)) ?>" aria-label="Trang sau">&raquo;</a>
+                  <?php else: ?>
+                    <span class="vo-hieu">&raquo;</span>
+                  <?php endif; ?>
+                </li>
+              </ul>
+            </nav>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
     </section>
   </main>
 

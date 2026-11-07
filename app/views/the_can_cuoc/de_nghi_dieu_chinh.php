@@ -1,83 +1,435 @@
+
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$the = $the ?? [];
+$yeuCauDaGui = $yeuCauDaGui ?? null;
+$csrf_token = $csrf_token ?? '';
+
+$e = function ($value) {
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
+};
+
+$ngayHienTai = date('d/m/Y');
+
+$trangThaiMap = [
+    'cho_tiep_nhan' => 'Chờ tiếp nhận',
+    'cho_xu_ly' => 'Chờ xử lý',
+    'da_duyet' => 'Đã duyệt',
+    'tu_choi' => 'Từ chối'
+];
+
+$trangThai = $yeuCauDaGui['trang_thai'] ?? '';
+$tenTrangThai = $trangThaiMap[$trangThai] ?? 'Chưa xác định';
+
+$maVaiTro = (int)($_SESSION['ma_vai_tro'] ?? 0);
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đề nghị điều chỉnh căn cước</title>
-    <link rel="stylesheet" href="/css/vneid-theme.css">
-    <link rel="stylesheet" href="/css/professional-form.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Đề nghị điều chỉnh thông tin căn cước</title>
+    <link rel="stylesheet" href="/public/css/trang-chu.css">
+    <link rel="stylesheet" href="/public/css/chi-tiet.css">
+
     <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#E9EAE8;font-family:'Times New Roman',Times,serif;color:#111827;padding:28px 16px}
-    .box{max-width:720px;margin:auto;background:#fff;border-radius:20px;padding:26px 28px 30px;box-shadow:0 18px 45px rgba(0,0,0,.22)}
-    .back-link{display:inline-flex;align-items:center;color:#c31818;text-decoration:none;font-weight:800;font-size:14px;margin-bottom:18px}
-    .page-title{text-align:center;font-size:23px;margin:0 0 22px;color:#111827}
-    .section{border-top:1px solid #e5e7eb;margin-top:18px;padding-top:18px}
-    .section-title{font-size:15px;font-weight:800;margin-bottom:14px;color:#111827}
-    .field{margin-bottom:15px}
-    .field label{display:block;font-size:13px;font-weight:800;color:#a52a2a;margin-bottom:7px}
-    .field input,.field textarea,.field select{width:100%;border:1px solid #d1d5db;border-radius:8px;background:#fff;padding:12px 13px;color:#111827;font-size:14px;font-family:inherit;outline:none}
-    .field input:focus,.field textarea:focus,.field select:focus{border-color:#df2424;box-shadow:0 0 0 3px rgba(227,38,31,.08)}
-    .field textarea{min-height:82px;resize:vertical}
-    .readonly{background:#f8fafc!important;color:#6b7280!important}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .required{color:#e3261f}
-    .note{border-left:4px solid #e3261f;background:#fff7f7;color:#6b7280;padding:12px 14px;font-size:12px;line-height:1.55;margin:18px 0}
-    .btn{width:100%;border:0;border-radius:8px;padding:14px;background:#df2424;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 10px rgba(223,36,36,.2)}
-    .btn:hover{background:#c81e1e}
-    .notice{padding:12px;background:#ecfdf3;color:#166534;border-radius:8px;margin-bottom:16px;text-align:center;border:1px solid #bbf7d0}
-    .receipt-title{text-align:center;font-size:22px;font-weight:800;color:#111827;margin:0 0 20px}
-    .detail-row{display:grid;grid-template-columns:42% 58%;min-height:44px;border-bottom:1px solid #e2e8f0;padding:8px 0;align-items:center}
-    .detail-row span{color:#64748b}.detail-row strong{font-weight:600}
-    .back-btn{display:block;text-align:center;margin-top:20px;padding:13px;border-radius:8px;background:#fff;color:#334155;border:1px solid #cbd5e1;text-decoration:none;font-weight:800}
-    @media(max-width:600px){body{padding:0}.box{min-height:100vh;border-radius:0;padding:20px 18px}.row{grid-template-columns:1fr}.detail-row{grid-template-columns:38% 62%}}
+        /* Chỉ bổ sung những kiểu chưa có trong CSS chi tiết */
+        .adjustment-form .form-group {
+            margin-bottom: 18px;
+        }
+
+        .adjustment-form label {
+            display: block;
+            margin-bottom: 7px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .adjustment-form input,
+        .adjustment-form select,
+        .adjustment-form textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #222;
+            background: #fff;
+        }
+
+        .adjustment-form input:focus,
+        .adjustment-form select:focus,
+        .adjustment-form textarea:focus {
+            outline: none;
+            border-color: #e3261f;
+            box-shadow: 0 0 0 2px rgba(227, 38, 31, 0.1);
+        }
+
+        .adjustment-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .adjustment-form .required {
+            color: #e3261f;
+        }
+
+        .adjustment-form .form-note {
+            margin-top: 6px;
+            color: #8e8e93;
+            font-size: 12px;
+        }
+
+        .adjustment-form .readonly-field {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .adjustment-form .btn-submit {
+            background: #e3261f;
+            color: #fff;
+        }
+
+        .adjustment-form .btn-submit:hover {
+            background: #c91e17;
+        }
+
+        .adjustment-form .notice {
+            padding: 13px 15px;
+            margin: 18px 0;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .adjustment-form .receipt-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 30px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .adjustment-form .receipt-status.approved {
+            background: #e6f4ea;
+            color: #137333;
+        }
+
+        .adjustment-form .receipt-status.rejected {
+            background: #fce8e6;
+            color: #c5221f;
+        }
+
+        .adjustment-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .adjustment-form .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
     </style>
 </head>
+
 <body>
-<div class="box">
-    <a class="back-link" href="/the_can_cuoc/quan_ly_ho_so_cua_toi">← Quay lại quản lý hồ sơ</a>
-    <?php if ($yeuCauDaGui === null): ?>
-        <h1 class="page-title">Đề nghị điều chỉnh căn cước</h1>
-    <?php endif; ?>
-    <?php if ($yeuCauDaGui !== null): ?>
-        <h1 class="receipt-title">Chi tiết yêu cầu điều chỉnh</h1>
-        <div class="detail-row"><span>Số CCCD</span><strong><?php echo e($yeuCauDaGui['so_cccd']); ?></strong></div>
-        <div class="detail-row"><span>Họ và tên</span><strong><?php echo e($yeuCauDaGui['ho_ten_moi'] ?: $yeuCauDaGui['ho_ten_cu']); ?></strong></div>
-        <div class="detail-row"><span>Ngày sinh</span><strong><?php echo e($yeuCauDaGui['ngay_sinh_moi'] ?: $yeuCauDaGui['ngay_sinh_cu']); ?></strong></div>
-        <div class="detail-row"><span>Giới tính</span><strong><?php echo e($yeuCauDaGui['gioi_tinh_moi'] ?: $yeuCauDaGui['gioi_tinh_cu']); ?></strong></div>
-        <div class="detail-row"><span>Quốc tịch</span><strong><?php echo e($yeuCauDaGui['quoc_tich_moi'] ?: $yeuCauDaGui['quoc_tich_cu']); ?></strong></div>
-        <div class="detail-row"><span>Dân tộc</span><strong><?php echo e($yeuCauDaGui['dan_toc_moi'] ?: $yeuCauDaGui['dan_toc_cu']); ?></strong></div>
-        <div class="detail-row"><span>Tôn giáo</span><strong><?php echo e($yeuCauDaGui['ton_giao_moi'] ?: $yeuCauDaGui['ton_giao_cu']); ?></strong></div>
-        <div class="detail-row"><span>Quê quán</span><strong><?php echo e($yeuCauDaGui['que_quan_moi'] ?: $yeuCauDaGui['que_quan_cu']); ?></strong></div>
-        <div class="detail-row"><span>Nơi thường trú</span><strong><?php echo e($yeuCauDaGui['noi_thuong_tru_moi'] ?: $yeuCauDaGui['noi_thuong_tru_cu']); ?></strong></div>
-        <div class="detail-row"><span>Ảnh chân dung</span><strong><?php echo e($yeuCauDaGui['anh_chan_dung_moi'] ?: $yeuCauDaGui['anh_chan_dung_cu']); ?></strong></div>
-        <div class="detail-row"><span>Lý do điều chỉnh</span><strong><?php echo nl2br(e($yeuCauDaGui['ly_do'])); ?></strong></div>
-        <div class="detail-row"><span>Trạng thái</span><strong>Chờ tiếp nhận</strong></div>
-        <a class="back-btn" href="/the_can_cuoc/quan_ly_ho_so_cua_toi">Quay về trang trước đó</a>
+    <?php require __DIR__ . '/../nguoi_dung/thanh_menu.php'; ?>
+
+<div class="vneid-form-container">
+
+    <a href="/the_can_cuoc/chi_tiet" class="btn-back-arrow">
+        ← Quay lại thông tin căn cước
+    </a>
+
+    <h1 class="vneid-section-title">
+        ĐỀ NGHỊ ĐIỀU CHỈNH THÔNG TIN
+    </h1>
+
+    <p class="section-description">
+        Gửi yêu cầu cập nhật thông tin trên thẻ căn cước
+    </p>
+
+    <?php if (!empty($yeuCauDaGui)): ?>
+
+        <?php
+        $classTrangThai = '';
+
+        if ($trangThai === 'da_duyet') {
+            $classTrangThai = 'approved';
+        } elseif ($trangThai === 'tu_choi') {
+            $classTrangThai = 'rejected';
+        }
+        ?>
+
+        <h3 class="info-section-title">
+            Thông tin đề nghị đã gửi
+        </h3>
+
+        <div class="info-row">
+            <span class="info-label">Số định danh</span>
+            <span class="info-value identity-number">
+                <?= $e($yeuCauDaGui['so_dinh_danh']
+                    ?? $yeuCauDaGui['so_cccd']
+                    ?? $the['so_dinh_danh']
+                    ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Họ và tên mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['ho_ten_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Ngày sinh mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['ngay_sinh_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Giới tính mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['gioi_tinh_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Quốc tịch mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['quoc_tich_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Dân tộc mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['dan_toc_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Tôn giáo mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['ton_giao_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Quê quán mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['que_quan_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Nơi thường trú mới</span>
+            <span class="info-value">
+                <?= $e($yeuCauDaGui['noi_thuong_tru_moi'] ?? '') ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Lý do điều chỉnh</span>
+            <span class="info-value">
+                <?= nl2br($e($yeuCauDaGui['ly_do'] ?? '')) ?>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">Trạng thái</span>
+            <span class="info-value">
+                <span class="receipt-status <?= $classTrangThai ?>">
+                    <?= $e($tenTrangThai) ?>
+                </span>
+            </span>
+        </div>
+
+        <div class="vneid-action-bar">
+            <a href="/the_can_cuoc/chiTiet"
+               class="btn-action btn-close-home">
+                Quay lại
+            </a>
+        </div>
+
     <?php else: ?>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="ma_csrf" value="<?php echo e(taoMaCsrf()); ?>">
-        <div class="field"><label>Số căn cước công dân <span class="required">*</span></label><input class="readonly" value="<?php echo e($the['so_cccd']); ?>" readonly></div>
-        <div class="section"><div class="section-title">Thông tin đề nghị điều chỉnh</div></div>
-        <div class="field"><label>Họ và tên</label><input name="ho_ten_moi" value="<?php echo e($the['ho_ten']); ?>"></div>
-        <div class="row">
-            <div class="field"><label>Ngày sinh</label><input type="date" name="ngay_sinh_moi" value="<?php echo e($the['ngay_sinh']); ?>"></div>
-            <div class="field"><label>Giới tính</label><select name="gioi_tinh_moi"><option <?php echo $the['gioi_tinh'] === 'Nam' ? 'selected' : ''; ?>>Nam</option><option <?php echo $the['gioi_tinh'] === 'Nữ' ? 'selected' : ''; ?>>Nữ</option><option <?php echo $the['gioi_tinh'] === 'Khác' ? 'selected' : ''; ?>>Khác</option></select></div>
+
+        <div class="notice">
+            <strong>Lưu ý:</strong>
+            Vui lòng nhập thông tin mới mà bạn muốn điều chỉnh.
+            Yêu cầu sẽ được chuyển đến cán bộ có thẩm quyền để xem xét.
+            Thông tin trên thẻ hiện tại không bị thay đổi ngay khi gửi đề nghị.
         </div>
-        <div class="row">
-            <div class="field"><label>Quốc tịch</label><input name="quoc_tich_moi" value="<?php echo e($the['quoc_tich'] ?? 'Việt Nam'); ?>"></div>
-            <div class="field"><label>Dân tộc</label><input name="dan_toc_moi" value="<?php echo e($the['dan_toc'] ?? ''); ?>"></div>
+
+        <h3 class="info-section-title">
+            I. Thông tin cá nhân
+        </h3>
+
+        <div class="info-row">
+            <span class="info-label">Số định danh cá nhân</span>
+            <span class="info-value identity-number">
+                <?= $e($the['so_dinh_danh'] ?? '') ?>
+            </span>
         </div>
-        <div class="row">
-            <div class="field"><label>Tôn giáo</label><input name="ton_giao_moi" value="<?php echo e($the['ton_giao'] ?? ''); ?>"></div>
-            <div class="field"><label>Quê quán</label><input name="que_quan_moi" value="<?php echo e($the['que_quan']); ?>"></div>
+
+        <div class="info-row">
+            <span class="info-label">Họ và tên hiện tại</span>
+            <span class="info-value">
+                <?= $e($the['ho_ten'] ?? '') ?>
+            </span>
         </div>
-        <div class="field"><label>Nơi thường trú</label><textarea name="noi_thuong_tru_moi"><?php echo e($the['noi_thuong_tru']); ?></textarea></div>
-        <div class="field"><label>Ảnh chân dung</label><input type="file" name="anh_chan_dung_moi" accept="image/jpeg,image/png,image/webp"></div>
-        <div class="field"><label>Lý do điều chỉnh <span class="required">*</span></label><textarea name="ly_do" required placeholder="Nhập lý do đề nghị điều chỉnh"></textarea></div>
-        <div class="note">Lưu ý: Liên hệ đăng ký cấp đổi thẻ căn cước sẽ được chuyển đến cơ quan Công an khi yêu cầu được tiếp nhận. Công dân chỉ có thể đề nghị các thông tin trong phạm vi cho phép.</div>
-        <button class="btn">Gửi yêu cầu</button>
-    </form>
+
+        <div class="info-row">
+            <span class="info-label">Ngày gửi đề nghị</span>
+            <span class="info-value">
+                <?= $ngayHienTai ?>
+            </span>
+        </div>
+
+        <h3 class="info-section-title">
+            II. Nội dung đề nghị điều chỉnh
+        </h3>
+
+        <form class="adjustment-form"
+              method="POST"
+              action="/the_can_cuoc/yeu_cau_dieu_chinh"
+              enctype="multipart/form-data">
+            <input type="hidden"
+                   name="csrf_token"
+                   value="<?= $e($csrf_token) ?>">
+
+            <div class="form-group">
+                <label for="ho_ten_moi">
+                    Họ và tên mới <span class="required">*</span>
+                </label>
+                <input type="text"
+                       id="ho_ten_moi"
+                       name="ho_ten_moi"
+                       maxlength="100"
+                       placeholder="Nhập họ và tên muốn điều chỉnh"
+                       required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ngay_sinh_moi">
+                        Ngày sinh mới
+                    </label>
+                    <input type="date"
+                           id="ngay_sinh_moi"
+                           name="ngay_sinh_moi">
+                </div>
+
+                <div class="form-group">
+                    <label for="gioi_tinh_moi">
+                        Giới tính mới
+                    </label>
+                    <select id="gioi_tinh_moi"
+                            name="gioi_tinh_moi">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="quoc_tich_moi">Quốc tịch mới</label>
+                <input type="text"
+                       id="quoc_tich_moi"
+                       name="quoc_tich_moi"
+                       placeholder="Nhập quốc tịch mới">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dan_toc_moi">Dân tộc mới</label>
+                    <input type="text"
+                           id="dan_toc_moi"
+                           name="dan_toc_moi"
+                           placeholder="Nhập dân tộc mới">
+                </div>
+
+                <div class="form-group">
+                    <label for="ton_giao_moi">Tôn giáo mới</label>
+                    <input type="text"
+                           id="ton_giao_moi"
+                           name="ton_giao_moi"
+                           placeholder="Nhập tôn giáo mới">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="que_quan_moi">Quê quán mới</label>
+                <textarea id="que_quan_moi"
+                          name="que_quan_moi"
+                          placeholder="Nhập quê quán mới"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="noi_thuong_tru_moi">
+                    Nơi thường trú mới
+                </label>
+                <textarea id="noi_thuong_tru_moi"
+                          name="noi_thuong_tru_moi"
+                          placeholder="Nhập nơi thường trú mới"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="anh_chan_dung_moi">
+                    Ảnh chân dung mới (nếu có)
+                </label>
+                <input type="file"
+                       id="anh_chan_dung_moi"
+                       name="anh_chan_dung_moi"
+                       accept="image/jpeg,image/png,image/webp">
+
+                <p class="form-note">
+                    Chỉ chọn ảnh JPG, PNG hoặc WEBP.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="ly_do">
+                    Lý do đề nghị điều chỉnh
+                    <span class="required">*</span>
+                </label>
+                <textarea id="ly_do"
+                          name="ly_do"
+                          required
+                          placeholder="Trình bày rõ lý do cần điều chỉnh thông tin..."></textarea>
+            </div>
+
+            <div class="vneid-action-bar">
+                <button type="submit"
+                        class="btn-action btn-submit">
+                    Gửi đề nghị điều chỉnh
+                </button>
+            </div>
+        </form>
+
     <?php endif; ?>
+
 </div>
+
 </body>
 </html>

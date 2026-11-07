@@ -43,6 +43,8 @@ class MucDinhDanhController {
             if (!$ds_loi) {
                 $this->nang_muc_model->themMoi($ma_nguoi_dung, json_encode($du_lieu, JSON_UNESCAPED_UNICODE),
                     $duong_dan_mat_truoc . ';' . $duong_dan_chan_dung);
+                $ma_ho_so_moi = (int)$this->pdo->lastInsertId();
+                $this->ghiNhatKy('nop_ho_so', 'Nộp hồ sơ nâng mức định danh #' . $ma_ho_so_moi, $ma_ho_so_moi);
                 try {
                     (new ThongBao($this->pdo))->guiChoCanBo(
                         ThongBao::LOAI_DICH_VU_CONG,
@@ -143,8 +145,33 @@ class MucDinhDanhController {
             $tieu_de = $trang_thai_moi === 'tu_choi' ? 'Hồ sơ nâng mức bị từ chối' : 'Hồ sơ nâng mức cần bổ sung';
             $this->nang_muc_model->guiThongBao($ho_so['ma_nguoi_dung'], $tieu_de, $ghi_chu);
         }
+        $khoa_nhat_ky = [
+            'da_duyet'    => 'duyet_ho_so',
+            'tu_choi'     => 'tu_choi_ho_so',
+            'can_bo_sung' => 'yeu_cau_bo_sung',
+        ][$trang_thai_moi];
+        $mo_ta_nhat_ky = [
+            'da_duyet'    => 'Duyệt hồ sơ nâng mức',
+            'tu_choi'     => 'Từ chối hồ sơ nâng mức',
+            'can_bo_sung' => 'Yêu cầu bổ sung hồ sơ nâng mức',
+        ][$trang_thai_moi];
+        $this->ghiNhatKy(
+            $khoa_nhat_ky,
+            $mo_ta_nhat_ky . ' #' . $ho_so['ma_ho_so'] . ' của người dùng #' . $ho_so['ma_nguoi_dung']
+                . ($ghi_chu !== '' ? '. Ghi chú: ' . $ghi_chu : ''),
+            (int)$ho_so['ma_ho_so']
+        );
         $_SESSION['thong_bao'] = 'Đã cập nhật hồ sơ.';
         chuyenHuong('muc_dinh_danh/danh_sach_cho_duyet');
+    }
+
+    // Ghi nhật ký hệ thống; lỗi ghi log không được làm hỏng việc nộp / duyệt hồ sơ
+    private function ghiNhatKy($hanh_dong, $noi_dung, $ma_ho_so) {
+        try {
+            ghiNhatKyHeThong($hanh_dong, $noi_dung, 'ho_so_dich_vu', $ma_ho_so);
+        } catch (Throwable $e) {
+            error_log('Ghi nhật ký thất bại (' . $hanh_dong . '): ' . $e->getMessage());
+        }
     }
 
     private function luuTep($ten_truong, $loai, $ma_nguoi_dung, array &$ds_loi) {

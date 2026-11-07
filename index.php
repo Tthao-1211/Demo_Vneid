@@ -53,9 +53,13 @@ if (!preg_match('/^[a-z_]+$/', $ten_module . $ten_hanh_dong)) {
     exit('Không tìm thấy trang');
 }
 
-$ten_class = str_replace(' ', '', ucwords(str_replace('_', ' ', $ten_module))) . 'Controller';
-$ten_ham   = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $ten_hanh_dong))));
-$tep       = __DIR__ . "/app/controllers/$ten_class.php";
+if($ten_module==='can_cuoc'||$ten_module==='the_can_cuoc'){
+    $ten_class='TheCanCuocController';
+}else{
+    $ten_class=str_replace(' ','',ucwords(str_replace('_',' ',$ten_module))).'Controller';
+}
+$ten_ham=lcfirst(str_replace(' ','',ucwords(str_replace('_',' ',$ten_hanh_dong))));
+$tep=__DIR__."/app/controllers/$ten_class.php";
 
 if (!is_file($tep)) {
     http_response_code(404);

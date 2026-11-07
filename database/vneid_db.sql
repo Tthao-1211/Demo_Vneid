@@ -179,3 +179,8 @@ INSERT INTO nhat_ky_he_thong (ma_nguoi_dung, hanh_dong, doi_tuong, ma_doi_tuong,
 (4,'that_bai',NULL,NULL,NULL,'127.0.0.1'),
 (4,'thanh_cong',NULL,NULL,NULL,'127.0.0.1'),
 (1,'khoa_tai_khoan','nguoi_dung',5,'Khóa tài khoản 056200000003. Lý do: nghi ngờ truy cập bất thường','127.0.0.1');
+
+INSERT INTO dich_vu (ten_dich_vu, muc_toi_thieu)
+VALUES
+    ('Cấp đổi thẻ căn cước', 1),
+    ('Điều chỉnh thông tin căn cước', 1);

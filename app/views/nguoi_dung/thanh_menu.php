@@ -33,6 +33,10 @@ $trang_cong_dan = [
     '/giay_to_vi/them_moi',
     '/giay_to_vi/xem_the_can_cuoc',
     '/muc_dinh_danh/nop_ho_so',
+    '/the_can_cuoc/yeu_cau_cua_toi',
+    '/the_can_cuoc/yeu_cau_dieu_chinh',
+    '/the_can_cuoc/yeu_cau_cap_the',
+    '/the_can_cuoc/chi_tiet',
 ];
 $la_trang_cong_dan = in_array($duong_dan_hien_tai, $trang_cong_dan, true);
 
@@ -43,12 +47,12 @@ if ($la_quan_tri) {
     ];
 } elseif ($la_can_bo) {
     $ds_muc_menu = [
-        [$trang_chu,                   'Trang chủ'],
+        [$trang_chu,                        'Trang chủ'],
         ['/nguoi_dung/trang_chu_can_bo',    'Duyệt hồ sơ'],
     ];
 } else {
     $ds_muc_menu = [
-        [$trang_chu,                              'Trang chủ'],
+        [$trang_chu,                        'Trang chủ'],
     ];
 }
 
@@ -63,7 +67,7 @@ if (!function_exists('laMucDangChon')) {
         }
         if ($duong_dan_muc === '/nguoi_dung/trang_chu_can_bo') {
             return !$la_trang_cong_dan
-                && in_array($module, ['muc_dinh_danh', 'giay_to_vi', 'dich_vu', 'can_bo'], true);
+                && in_array($module, ['muc_dinh_danh', 'giay_to_vi', 'dich_vu', 'can_bo', 'the_can_cuoc'], true);
         }
         return false;
     }
@@ -128,6 +132,7 @@ if (!function_exists('laMucDangChon')) {
         </summary>
         <div class="danh-sach">
           <a href="/nguoi_dung/cai_dat">Cài đặt tài khoản</a>
+          <a href="/the_can_cuoc/yeu_cau_cua_toi">Yêu cầu của tôi</a>
           <a href="/nguoi_dung/dang_xuat" onclick="return confirm('Đăng xuất khỏi tài khoản?');">Đăng xuất</a>
         </div>
       </details>
@@ -137,6 +142,7 @@ if (!function_exists('laMucDangChon')) {
 
 <?php
 $module_hien_tai = explode('/', trim($duong_dan_hien_tai, '/'))[0];
+
 $ds_chuc_nang = [];
 if ($la_quan_tri) {
     $tieu_de_cot  = 'Quản trị hệ thống';
@@ -158,52 +164,112 @@ if ($la_quan_tri) {
               <rect x="13" y="3" width="8" height="5" rx="1.5"/>
               <rect x="13" y="10" width="8" height="11" rx="1.5"/>
               <rect x="3" y="13" width="8" height="8" rx="1.5"/>'],
+
+        // ---- Nhóm: Căn cước ----
+        ['', 'Căn cước', 'the_can_cuoc',
+            '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.5-1.7 1.8-2.5 3-2.5s2.5.8 3 2.5M14 10h5M14 14h5"/>',
+            [
+                ['/the_can_cuoc/danh_sach',          'Danh sách thẻ',     'the_can_cuoc'],
+                ['/the_can_cuoc/danh_sach_yeu_cau',  'Danh sách yêu cầu', 'the_can_cuoc'],
+            ]],
+
         ['/muc_dinh_danh/danh_sach_cho_duyet', 'Nâng mức định danh', 'muc_dinh_danh',
             '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5L16 9.5"/>'],
-        ['/can_bo/duyet?trang_thai=&che_do=xem', 'Danh sách giấy tờ', 'can_bo',
-            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>'],
-        ['/can_bo/duyet', 'Duyệt giấy tờ', 'can_bo',
-            '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
-        ['/can_bo/loai_giay_to', 'Quản lý loại giấy tờ', 'can_bo',
-            '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>'],
-        ['/can_bo/lich_su', 'Lịch sử xử lý', 'can_bo',
-            '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'],
+
+        // ---- Nhóm: Giấy tờ ----
+        ['', 'Giấy tờ', 'can_bo',
+            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+            [
+                ['/can_bo/duyet?trang_thai=&che_do=xem', 'Danh sách giấy tờ',    'can_bo'],
+                ['/can_bo/duyet',                        'Duyệt giấy tờ',        'can_bo'],
+                ['/can_bo/loai_giay_to',                 'Quản lý loại giấy tờ', 'can_bo'],
+                ['/can_bo/lich_su',                      'Lịch sử xử lý',        'can_bo'],
+            ]],
+
         ['/dich_vu/ds_ho_so_can_xu_ly', 'Duyệt hồ sơ dịch vụ công', 'dich_vu',
             '<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>'],
     ];
 }
+
 $trang_co_cot = $la_quan_tri
     ? ($module_hien_tai === 'quan_tri')
     : ($la_can_bo
         && !$la_trang_cong_dan
-        && (in_array($module_hien_tai, ['muc_dinh_danh', 'giay_to_vi', 'dich_vu', 'can_bo'], true)
+        && (in_array($module_hien_tai, ['muc_dinh_danh', 'giay_to_vi', 'dich_vu', 'can_bo', 'the_can_cuoc'], true)
             || $duong_dan_hien_tai === '/nguoi_dung/trang_chu_can_bo'));
+
+// Kiểm tra một liên kết có đang được chọn không
+$kiem_tra_dang_chon = function (string $lk, string $mo_dun) use ($la_quan_tri, $duong_dan_hien_tai, $module_hien_tai): bool {
+    if ($la_quan_tri) {
+        return $lk === $duong_dan_hien_tai;
+    }
+
+    $lk_path = parse_url($lk, PHP_URL_PATH);
+
+    if ($mo_dun === 'can_bo') {
+        // So theo đường dẫn đầy đủ để mỗi mục sáng riêng
+        $xem_tat_ca = isset($_GET['trang_thai']) && $_GET['trang_thai'] === '';
+        if (strpos($lk, '?') !== false) {
+            return ($lk_path === $duong_dan_hien_tai) && $xem_tat_ca;
+        }
+        return ($lk_path === $duong_dan_hien_tai)
+            && !($lk_path === '/can_bo/duyet' && $xem_tat_ca);
+    }
+
+    if ($mo_dun === 'the_can_cuoc') {
+        // Trang thuộc nhóm "yêu cầu": đường dẫn hiện tại có chứa 'yeu_cau'
+        $la_trang_yeu_cau = strpos($duong_dan_hien_tai, 'yeu_cau') !== false;
+        if ($lk_path === '/the_can_cuoc/danh_sach') {
+            return ($module_hien_tai === 'the_can_cuoc') && !$la_trang_yeu_cau;
+        }
+        return $la_trang_yeu_cau;
+    }
+
+    return $mo_dun === $module_hien_tai;
+};
+
 if ($ds_chuc_nang && $trang_co_cot):
 ?>
 <aside class="cot-chuc-nang cot-co-dinh">
   <h3><?= e($tieu_de_cot) ?></h3>
-  <?php foreach ($ds_chuc_nang as [$lk, $ten_cn, $mo_dun, $icon_cn]): ?>
-    <?php
-      if ($la_quan_tri) {
-          $dang_chon_cn = ($lk === $duong_dan_hien_tai);
-      } elseif ($mo_dun === 'can_bo') {
-          // Các mục của module can_bo: so theo đường dẫn đầy đủ để mỗi mục sáng riêng
-          $lk_path = parse_url($lk, PHP_URL_PATH);
-          $xem_tat_ca = isset($_GET['trang_thai']) && $_GET['trang_thai'] === '';
-          if (strpos($lk, '?') !== false) {
-              $dang_chon_cn = ($lk_path === $duong_dan_hien_tai) && $xem_tat_ca;
-          } else {
-              $dang_chon_cn = ($lk_path === $duong_dan_hien_tai)
-                  && !($lk_path === '/can_bo/duyet' && $xem_tat_ca);
-          }
-      } else {
-          $dang_chon_cn = ($mo_dun === $module_hien_tai);
-      }
+
+  <?php foreach ($ds_chuc_nang as $cn):
+      $lk      = $cn[0];
+      $ten_cn  = $cn[1];
+      $mo_dun  = $cn[2];
+      $icon_cn = $cn[3];
+      $ds_con  = $cn[4] ?? [];
+  ?>
+
+    <?php if ($ds_con):
+        // Mở sẵn nếu đang đứng ở một trang con
+        $co_con_chon = false;
+        foreach ($ds_con as $c) {
+            if ($kiem_tra_dang_chon($c[0], $c[2])) { $co_con_chon = true; break; }
+        }
     ?>
-    <a href="<?= $lk ?>" class="<?= $dang_chon_cn ? 'dang-chon' : '' ?>">
-      <svg viewBox="0 0 24 24"><?= $icon_cn ?></svg>
-      <span><?= e($ten_cn) ?><?= $lk === '#' ? '<small>Sắp có</small>' : '' ?></span>
-    </a>
+      <details class="nhom-con" <?= $co_con_chon ? 'open' : '' ?>>
+        <summary class="muc-cha <?= $co_con_chon ? 'co-con-chon' : '' ?>">
+          <svg viewBox="0 0 24 24"><?= $icon_cn ?></svg>
+          <span><?= e($ten_cn) ?></span>
+          <svg class="mui-ten" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="ds-con">
+          <?php foreach ($ds_con as $c): ?>
+            <a href="<?= $c[0] ?>" class="muc-con <?= $kiem_tra_dang_chon($c[0], $c[2]) ? 'dang-chon' : '' ?>">
+              <span><?= e($c[1]) ?></span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      </details>
+
+    <?php else: ?>
+      <a href="<?= $lk ?>" class="<?= $kiem_tra_dang_chon($lk, $mo_dun) ? 'dang-chon' : '' ?>">
+        <svg viewBox="0 0 24 24"><?= $icon_cn ?></svg>
+        <span><?= e($ten_cn) ?><?= $lk === '#' ? '<small>Sắp có</small>' : '' ?></span>
+      </a>
+    <?php endif; ?>
+
   <?php endforeach; ?>
 </aside>
 <?php endif; ?>
@@ -315,4 +381,62 @@ if ($ds_chuc_nang && $trang_co_cot):
   font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
 }
 .thanh-menu .item-tb .tieu-de-tb { line-height: 1.35; }
+
+/* ===== Menu con trong cột chức năng ===== */
+.cot-chuc-nang .nhom-con { margin: 0; }
+
+.cot-chuc-nang .nhom-con > summary.muc-cha {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  user-select: none;
+  transition: background .2s, color .2s;
+}
+.cot-chuc-nang .nhom-con > summary.muc-cha::-webkit-details-marker { display: none; }
+.cot-chuc-nang .nhom-con > summary.muc-cha:hover { background: rgba(0, 0, 0, .05); }
+.cot-chuc-nang .nhom-con > summary.muc-cha > svg:first-child {
+  width: 20px; height: 20px; flex: 0 0 20px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.cot-chuc-nang .nhom-con > summary.muc-cha > span { flex: 1; }
+.cot-chuc-nang .nhom-con > summary.muc-cha.co-con-chon { color: #d71f18; font-weight: 600; }
+
+/* Mũi tên xoay khi mở */
+.cot-chuc-nang .mui-ten {
+  width: 16px; height: 16px; flex: 0 0 16px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .2s;
+}
+.cot-chuc-nang .nhom-con[open] > summary .mui-ten { transform: rotate(180deg); }
+
+/* Danh sách con thụt vào, có đường kẻ dọc */
+.cot-chuc-nang .ds-con {
+  margin: 2px 0 6px 22px;
+  padding-left: 12px;
+  border-left: 2px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cot-chuc-nang .ds-con .muc-con {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: .9em;
+  text-decoration: none;
+  color: inherit;
+  transition: background .2s, color .2s;
+}
+.cot-chuc-nang .ds-con .muc-con:hover { background: rgba(0, 0, 0, .05); }
+.cot-chuc-nang .ds-con .muc-con.dang-chon {
+  background: #fdecec;
+  color: #d71f18;
+  font-weight: 600;
+}
 </style>

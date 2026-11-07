@@ -408,6 +408,11 @@ class NguoiDungController {
                         $nguoi_dung['ma_nguoi_dung'], NguoiDung::TRANG_THAI_HOAT_DONG);
                     ghiNhatKyHeThong('kich_hoat', 'Kích hoạt tài khoản qua OTP', 'nguoi_dung',
                     $nguoi_dung['ma_nguoi_dung'], $nguoi_dung['ma_nguoi_dung']);
+                    try {
+                        guiMailSoDinhDanh($nguoi_dung['email'], $nguoi_dung['ho_ten'], $nguoi_dung['so_dinh_danh']);
+                    } catch (Throwable $e) {
+                        error_log('Gửi mail số định danh thất bại: ' . $e->getMessage());
+                    }
                     $this->xoaPhienOtp();
                     chuyenHuong('nguoi_dung/dang_nhap');
                 }
